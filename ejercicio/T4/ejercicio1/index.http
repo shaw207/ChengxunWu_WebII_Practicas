@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:3000
+@apiUrl = {{baseUrl}}/api
+
+### Health check
+GET {{baseUrl}}/health
+
+### Health check with apiUrl variable
+GET {{apiUrl}}
+
+### GET all tasks
+GET {{apiUrl}}/todos
+Accept: application/json
+
+### GET tasks with query (priority, completed, limit, offset, sortBy)
+GET {{apiUrl}}/todos?priority=high&completed=false&limit=5&offset=0&sortBy=dueDate
+Accept: application/json
+
+### GET task by id
+GET {{apiUrl}}/todos/1
+Accept: application/json
+
+### GET task by id (Error case: non-existent id)
+GET {{apiUrl}}/task/100
+Accept: application/json
+
+### POST create task
+POST {{apiUrl}}/todos
+Content-Type: application/json
+
+{
+	"title": "Tarea de prueba",
+	"description": "Creada desde index.http",
+	"priority": "medium",
+	"completed": false,
+	"dueDate": "2026-03-01T12:00:00.000Z",
+	"tags": ["test","http"]
+}
+
+### PUT replace task (id = 1)
+PUT {{apiUrl}}/todos/1
+Content-Type: application/json
+
+{
+	"title": "Tarea actualizada",
+	"description": "Reemplazada via PUT",
+	"priority": "high",
+	"completed": true,
+	"dueDate": "2026-03-10T12:00:00.000Z",
+	"tags": ["updated"]
+}
+
+### PATCH partial update (id = 1)
+PATCH {{apiUrl}}/todos/1
+Content-Type: application/json
+
+{
+	"completed": true
+}
+
+### DELETE task (id = 1)
+DELETE {{apiUrl}}/todos/1
+
+
+
