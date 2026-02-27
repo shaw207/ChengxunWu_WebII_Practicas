@@ -1,0 +1,20 @@
+{
+  "name": "t5-ejercicio1",
+  "version": "1.0.0",
+  "description": "Proyecto de práctica Tema 5 - MVC y MongoDB",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "dev": "node --env-file=.env --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.0.0",
+    "mongoose": "^8.0.0",
+    "zod": "^3.0.0",
+    "helmet": "^7.0.0",
+    "cors": "^2.0.0"
+  }
+}

@@ -1,31 +1,28 @@
-// src/ .js
+// src/app.js
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import routes from './routes/index.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 const app = express();
 
-// Seguridad
+// middleware globales
 app.use(helmet());
 app.use(cors());
-
-// Parseo de body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
+// health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Rutas de la API
+// rutas de la API
 app.use('/api', routes);
 
-// Manejo de errores
-app.use(notFoundHandler);
+// manejo de errores
+app.use(notFound);
 app.use(errorHandler);
 
 export default app;
-
