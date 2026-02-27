@@ -1,34 +1,26 @@
 // src/models/movie.model.js
 import mongoose from 'mongoose';
 
-const currentYear = new Date().getFullYear();
-
 const movieSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, minlength: 2 },
-    director: { type: String, required: true },
-    year: { type: Number, required: true, min: 1888, max: currentYear },
-    genre: { type: String, enum: ['action', 'comedy', 'drama', 'horror', 'scifi'] },
+    title: { type: String, required: [true, 'El título es requerido'], trim: true },
+    director: { type: String, required: [true, 'El director es requerido'], trim: true },
+    year: { type: Number, required: [true, 'El año es requerido'], min: [1888, 'Año no válido'] },
+    genre: { type: String, default: null, trim: true },
+
     copies: { type: Number, default: 5, min: 0 },
-    availableCopies: { type: Number, min: 0 },
+    availableCopies: { type: Number, default: 5, min: 0 },
     timesRented: { type: Number, default: 0, min: 0 },
+
+    // nombre de archivo guardado por multer
     cover: { type: String, default: null }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-
-movieSchema.pre('save', function (next) {
-  if (this.isNew && (this.availableCopies === undefined || this.availableCopies === null)) {
-    this.availableCopies = this.copies;
-  }
-  next();
-});
-
-movieSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.__v;
-  return obj;
-};
+// índices útiles
+movieSchema.index({ title: 1 });
+movieSchema.index({ genre: 1 });
+movieSchema.index({ timesRented: -1 });
 
 export default mongoose.model('Movie', movieSchema);

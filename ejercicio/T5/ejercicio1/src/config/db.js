@@ -7,14 +7,20 @@ const dbConnect = async () => {
     throw new Error('La variable de entorno DB_URI no está definida');
   }
 
-  // connect without deprecated options (driver v4+ ignores them)
   try {
-    await mongoose.connect(uri);
+    console.log("DB_URI_RUNTIME =", process.env.DB_URI);
+if (process.env.DB_URI?.includes("nnet")) throw new Error("DB_URI contiene 'nnet' (typo).");
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 });
     console.log('✅ Conectado a MongoDB');
   } catch (err) {
     console.warn('⚠️ Error conectando a MongoDB:', err.message);
-    console.log('💡 Continuando sin BD en modo desarrollo...');
-    // En desarrollo, permitir continuar sin BD para trabajar en código
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💡 Continuando sin BD en modo desarrollo (API devolverá 503 si se usa DB)...');
+      return;
+    }
+
+    throw err;
   }
 
   mongoose.connection.on('disconnected', () => {
@@ -23,7 +29,7 @@ const dbConnect = async () => {
 
   process.on('SIGINT', async () => {
     await mongoose.connection.close();
-    console.log('Conexión Mongo cerrada por SIGINT');
+    console.log('🔌 Conexión a MongoDB cerrada');
     process.exit(0);
   });
 };

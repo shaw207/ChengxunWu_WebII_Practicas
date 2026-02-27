@@ -1,0 +1,43 @@
+@base = http://localhost:3000/api/movies
+@movieId = 
+
+### 1. Crear película
+POST {{base}}
+Content-Type: application/json
+
+{
+  "title": "Matrix",
+  "director": "Wachowski",
+  "year": 1999,
+  "genre": "scifi",
+  "copies": 3
+}
+
+### 2. Listar todas
+GET {{base}}
+
+### 3. Filtrar por género
+GET {{base}}?genre=scifi
+
+### 4. Obtener por ID (reemplaza @movieId en línea 2)
+GET {{base}}/{{movieId}}
+
+### 5. Alquilar
+PATCH {{base}}/{{movieId}}/rent
+
+### 6. Devolver
+PATCH {{base}}/{{movieId}}/return
+
+### 7. Top 5 alquiladas
+GET {{base}}/stats/top
+
+### 8. Actualizar
+PUT {{base}}/{{movieId}}
+Content-Type: application/json
+
+{
+  "title": "The Matrix Reloaded"
+}
+
+### 9. Eliminar
+DELETE {{base}}/{{movieId}}
