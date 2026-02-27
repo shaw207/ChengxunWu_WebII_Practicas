@@ -7,10 +7,15 @@ const dbConnect = async () => {
     throw new Error('La variable de entorno DB_URI no está definida');
   }
 
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  // connect without deprecated options (driver v4+ ignores them)
+  try {
+    await mongoose.connect(uri);
+    console.log('✅ Conectado a MongoDB');
+  } catch (err) {
+    console.warn('⚠️ Error conectando a MongoDB:', err.message);
+    console.log('💡 Continuando sin BD en modo desarrollo...');
+    // En desarrollo, permitir continuar sin BD para trabajar en código
+  }
 
   mongoose.connection.on('disconnected', () => {
     console.warn('⚠️ Desconectado de MongoDB');
