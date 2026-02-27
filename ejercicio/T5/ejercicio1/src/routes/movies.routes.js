@@ -2,22 +2,24 @@
 import { Router } from 'express';
 import * as controller from '../controllers/movie.controller.js';
 import multerConfig from '../utils/multer.js';
+import { validate, validateObjectId } from '../middleware/validate.middleware.js';
+import { createMovieSchema, listMoviesSchema, updateMovieSchema } from '../schemas/movie.schema.js';
 
 const router = Router();
 const upload = multerConfig.single('cover');
 
-router.get('/', controller.list);
+router.get('/', validate(listMoviesSchema), controller.list);
 router.get('/stats/top', controller.top);
-router.get('/:id/cover', controller.getCover);
-router.get('/:id', controller.getById);
+router.get('/:id/cover', validateObjectId(), controller.getCover);
+router.get('/:id', validateObjectId(), controller.getById);
 
-router.post('/', controller.create);
+router.post('/', validate(createMovieSchema), controller.create);
 
-router.put('/:id', controller.update);
-router.delete('/:id', controller.remove);
+router.put('/:id', validateObjectId(), validate(updateMovieSchema), controller.update);
+router.delete('/:id', validateObjectId(), controller.remove);
 
-router.patch('/:id/rent', controller.rent);
-router.patch('/:id/return', controller.returnMovie);
-router.patch('/:id/cover', upload, controller.uploadCover);
+router.patch('/:id/rent', validateObjectId(), controller.rent);
+router.patch('/:id/return', validateObjectId(), controller.returnMovie);
+router.patch('/:id/cover', validateObjectId(), upload, controller.uploadCover);
 
 export default router;

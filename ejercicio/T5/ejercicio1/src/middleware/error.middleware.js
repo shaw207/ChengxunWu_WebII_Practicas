@@ -1,4 +1,7 @@
 // src/middleware/error.middleware.js
+import mongoose from 'mongoose';
+import multer from 'multer';
+
 export class ApiError extends Error {
   constructor(statusCode, message, details = null) {
     super(message);
@@ -31,11 +34,56 @@ export const notFound = (req, res) => {
 export const errorHandler = (err, req, res, next) => {
   console.error(err);
 
-  // Errores operacionales (controlados)
+  // Errores operacionales creados por la aplicacion
   if (err?.isOperational) {
     return res.status(err.statusCode).json({
       error: err.message,
       ...(err.details && { detalles: err.details })
+    });
+  }
+
+  // Errores de validacion de Mongoose
+  if (err instanceof mongoose.Error.ValidationError) {
+    const details = Object.values(err.errors).map((e) => ({
+      campo: e.path,
+      mensaje: e.message
+    }));
+
+    return res.status(400).json({
+      error: 'Error de validacion',
+      detalles: details
+    });
+  }
+
+  // ObjectId invalido o casteos invalidos
+  if (err instanceof mongoose.Error.CastError) {
+    return res.status(400).json({
+      error: `Valor invalido para '${err.path}'`
+    });
+  }
+
+  // Clave unica duplicada
+  if (err?.code === 11000) {
+    const field = Object.keys(err.keyValue ?? {})[0] ?? 'campo';
+    return res.status(409).json({
+      error: `Ya existe un registro con ese '${field}'`
+    });
+  }
+
+  // Errores de Multer
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        error: 'El archivo excede el tamano maximo de 5MB'
+      });
+    }
+
+    return res.status(400).json({ error: err.message });
+  }
+
+  if (err?.message === 'Tipo de archivo invalido') {
+    return res.status(400).json({
+      error: 'Tipo de archivo invalido. Solo se permiten jpeg, png, webp y gif'
     });
   }
 

@@ -1,7 +1,7 @@
 @base = http://localhost:3000/api/movies
-@movieId = 
 
-### 1. Crear película
+### 1. Crear pelicula
+# @name createMovie
 POST {{base}}
 Content-Type: application/json
 
@@ -13,13 +13,16 @@ Content-Type: application/json
   "copies": 3
 }
 
+### ID tomado automaticamente de la respuesta de createMovie
+@movieId = {{createMovie.response.body.$._id}}
+
 ### 2. Listar todas
 GET {{base}}
 
-### 3. Filtrar por género
+### 3. Filtrar por genero
 GET {{base}}?genre=scifi
 
-### 4. Obtener por ID (reemplaza @movieId en línea 2)
+### 4. Obtener por ID
 GET {{base}}/{{movieId}}
 
 ### 5. Alquilar
