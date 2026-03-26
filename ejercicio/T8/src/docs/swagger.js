@@ -4,13 +4,9 @@ const options = {
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'API de Podcasts - Express con Swagger',
+      title: 'PodcastHub API',
       version: '1.0.0',
-      description: 'API REST con documentaci贸n Swagger, testing Jest y monitorizaci贸n Slack',
-      license: {
-        name: 'MIT',
-        url: 'https://spdx.org/licenses/MIT.html'
-      }
+      description: 'API REST para gestionar podcasts con autenticación JWT, roles y documentación Swagger.'
     },
     servers: [
       {
@@ -29,44 +25,103 @@ const options = {
       schemas: {
         User: {
           type: 'object',
-          required: ['name', 'email', 'password'],
           properties: {
             _id: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
-            name: { type: 'string', example: 'Juan P茅rez' },
-            email: { type: 'string', format: 'email', example: 'juan@ejemplo.com' },
-            password: { type: 'string', format: 'password', example: 'MiPassword123' },
-            age: { type: 'integer', example: 25 },
-            role: { type: 'string', enum: ['user', 'admin'], default: 'user' }
+            name: { type: 'string', example: 'Ana Perez' },
+            email: { type: 'string', format: 'email', example: 'ana@example.com' },
+            role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
           }
         },
         Podcast: {
           type: 'object',
-          required: ['title', 'duration'],
           properties: {
-            _id: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
-            title: { type: 'string', example: 'Mi Podcast' },
-            artist: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
-            duration: { type: 'integer', example: 180 },
-            genres: {
-              type: 'array',
-              items: { type: 'string' },
-              example: ['rock', 'pop']
-            }
+            _id: { type: 'string', example: '65f8b3a2c9d1e20012345679' },
+            title: { type: 'string', example: 'Historia de la Web' },
+            description: { type: 'string', example: 'Un repaso largo y claro sobre la evolución de Internet.' },
+            author: {
+              oneOf: [
+                { type: 'string', example: '65f8b3a2c9d1e20012345678' },
+                { $ref: '#/components/schemas/User' }
+              ]
+            },
+            category: {
+              type: 'string',
+              enum: ['tech', 'science', 'history', 'comedy', 'news'],
+              example: 'tech'
+            },
+            duration: { type: 'integer', example: 1800 },
+            episodes: { type: 'integer', example: 12 },
+            published: { type: 'boolean', example: false },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
           }
         },
-        Login: {
+        AuthResponse: {
           type: 'object',
-          required: ['email', 'password'],
           properties: {
-            email: { type: 'string', format: 'email', example: 'juan@ejemplo.com' },
-            password: { type: 'string', format: 'password', example: 'MiPassword123' }
+            token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+            user: { $ref: '#/components/schemas/User' }
           }
         },
         Error: {
           type: 'object',
           properties: {
             error: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Error message' }
+            message: { type: 'string', example: 'INVALID_CREDENTIALS' }
+          }
+        },
+        RegisterRequest: {
+          type: 'object',
+          required: ['name', 'email', 'password'],
+          properties: {
+            name: { type: 'string', example: 'Ana Perez' },
+            email: { type: 'string', format: 'email', example: 'ana@example.com' },
+            password: { type: 'string', format: 'password', example: 'SuperPass123' }
+          }
+        },
+        LoginRequest: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'ana@example.com' },
+            password: { type: 'string', format: 'password', example: 'SuperPass123' }
+          }
+        },
+        CreatePodcastRequest: {
+          type: 'object',
+          required: ['title', 'description', 'category', 'duration'],
+          properties: {
+            title: { type: 'string', example: 'Historia de la Web' },
+            description: { type: 'string', example: 'Un repaso largo y claro sobre la evolución de Internet.' },
+            category: {
+              type: 'string',
+              enum: ['tech', 'science', 'history', 'comedy', 'news'],
+              example: 'history'
+            },
+            duration: { type: 'integer', example: 1800 },
+            episodes: { type: 'integer', example: 8 }
+          }
+        },
+        UpdatePodcastRequest: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', example: 'Historia moderna de la Web' },
+            description: { type: 'string', example: 'Versión revisada con más contexto.' },
+            category: {
+              type: 'string',
+              enum: ['tech', 'science', 'history', 'comedy', 'news'],
+              example: 'tech'
+            },
+            duration: { type: 'integer', example: 2100 },
+            episodes: { type: 'integer', example: 10 }
+          }
+        },
+        PublishPodcastRequest: {
+          type: 'object',
+          properties: {
+            published: { type: 'boolean', example: true }
           }
         }
       }
