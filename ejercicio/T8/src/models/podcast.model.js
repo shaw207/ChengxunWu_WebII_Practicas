@@ -5,19 +5,38 @@ const podcastSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      minlength: 3
     },
-    artist: {
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 10
+    },
+    author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
+    },
+    category: {
+      type: String,
+      required: true,
+      enum: ['tech', 'science', 'history', 'comedy', 'news']
     },
     duration: {
       type: Number,
-      required: true
+      required: true,
+      min: 60
     },
-    genres: {
-      type: [String],
-      default: []
+    episodes: {
+      type: Number,
+      default: 1,
+      min: 1
+    },
+    published: {
+      type: Boolean,
+      default: false
     }
   },
   {
