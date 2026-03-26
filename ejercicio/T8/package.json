@@ -1,17 +1,25 @@
 {
-  "name": "t8-docs-testing-monitoring",
+  "name": "podcasthub-api",
   "version": "1.0.0",
-  "description": "Documentación Swagger, Testing Jest y Monitorización Slack",
+  "description": "PodcastHub API con JWT, roles, Swagger y tests con Jest",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "dev": "node --watch --env-file=.env src/index.js",
     "start": "node --env-file=.env src/index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit --detectOpenHandles",
+    "test": "node --env-file=.env --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit --detectOpenHandles",
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage"
   },
-  "keywords": ["swagger", "jest", "slack", "nodejs", "express"],
+  "keywords": [
+    "swagger",
+    "jest",
+    "slack",
+    "nodejs",
+    "express",
+    "podcasts",
+    "jwt"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

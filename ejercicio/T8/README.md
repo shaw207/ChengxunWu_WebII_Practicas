@@ -1,14 +1,8 @@
-# T8 - Documentaci贸n, Testing y Monitorizaci贸n
+# PodcastHub API
 
-Proyecto que integra Swagger, Jest y notificaciones a Slack.
+API REST con autenticacion JWT, autorizacion por roles, documentacion Swagger y tests con Jest + Supertest.
 
-## Caracter铆sticas
-
-- **Swagger**: Documentaci贸n interactiva en `/api-docs`
-- **Jest + Supertest**: Tests automatizados
-- **Slack Webhooks**: Notificaci贸n de errores en tiempo real
-
-## Instalaci贸n
+## Instalacion
 
 ```bash
 npm install
@@ -19,46 +13,46 @@ npm run dev
 
 ## Endpoints
 
-### Documentaci贸n
-| M茅todo | Ruta | Descripci贸n |
+### Documentacion
+| Metodo | Ruta | Descripcion |
 |--------|------|-------------|
 | GET | `/api-docs` | Swagger UI |
 
 ### Auth
-| M茅todo | Ruta | Auth | Descripci贸n |
-|--------|------|------|-------------|
-| POST | `/api/auth/register` | No | Registrar usuario |
-| POST | `/api/auth/login` | No | Iniciar sesi贸n |
-| GET | `/api/auth/me` | S铆 | Obtener perfil |
+| Metodo | Ruta | Acceso | Descripcion |
+|--------|------|--------|-------------|
+| POST | `/api/auth/register` | Publico | Registro de usuario |
+| POST | `/api/auth/login` | Publico | Login, devuelve token |
+| GET | `/api/auth/me` | Autenticado | Perfil del usuario actual |
 
 ### Podcasts
-| M茅todo | Ruta | Auth | Rol | Descripci贸n |
-|--------|------|------|-----|-------------|
-| GET | `/api/podcasts` | No | - | Listar podcasts |
-| GET | `/api/podcasts/:id` | No | - | Obtener podcast |
-| POST | `/api/podcasts` | S铆 | user/admin | Crear podcast |
-| PUT | `/api/podcasts/:id` | S铆 | user/admin | Actualizar podcast |
-| DELETE | `/api/podcasts/:id` | S铆 | admin | Eliminar podcast |
+| Metodo | Ruta | Acceso | Descripcion |
+|--------|------|--------|-------------|
+| GET | `/api/podcasts` | Publico | Listar podcasts publicados |
+| GET | `/api/podcasts/:id` | Publico | Obtener un podcast |
+| POST | `/api/podcasts` | Autenticado | Crear podcast |
+| PUT | `/api/podcasts/:id` | Autenticado (autor) | Actualizar propio podcast |
+| DELETE | `/api/podcasts/:id` | Admin | Eliminar cualquier podcast |
+| GET | `/api/podcasts/admin/all` | Admin | Listar todos, incluidos no publicados |
+| PATCH | `/api/podcasts/:id/publish` | Admin | Publicar o despublicar |
 
 ## Testing
 
 ```bash
-# Ejecutar todos los tests
 npm test
-
-# Watch mode
 npm run test:watch
-
-# Cobertura
 npm run test:coverage
 ```
 
-## Variables de Entorno
+Los tests usan `MONGODB_TEST_URI`. Si la base esta en MongoDB Atlas, la IP actual debe estar permitida en la whitelist del cluster.
 
-| Variable | Descripci贸n |
+## Variables de entorno
+
+| Variable | Descripcion |
 |----------|-------------|
-| PORT | Puerto del servidor (default: 3000) |
-| DB_URI | URI de MongoDB |
+| PORT | Puerto del servidor |
+| MONGODB_URI | URI de MongoDB para desarrollo |
+| MONGODB_TEST_URI | URI de MongoDB para tests |
 | JWT_SECRET | Clave secreta para JWT |
-| JWT_EXPIRES_IN | Expiraci贸n del token (default: 2h) |
-| SLACK_WEBHOOK | URL del webhook de Slack |
+| JWT_EXPIRES_IN | Expiracion del token |
+| SLACK_WEBHOOK | Webhook de Slack para errores |
