@@ -4,18 +4,25 @@ import { handleHttpError } from '../utils/handleError.js';
 
 const authMiddleware = async (req, res, next) => {
   try {
-    if (!req.headers.authorization) {
+    const authorization = req.headers.authorization;
+
+    if (!authorization) {
       return handleHttpError(res, 'NOT_TOKEN', 401);
     }
 
-    const token = req.headers.authorization.split(' ').pop();
-    const dataToken = verifyToken(token);
+    const [scheme, token] = authorization.split(' ');
 
-    if (!dataToken || !dataToken._id) {
+    if (scheme !== 'Bearer' || !token) {
       return handleHttpError(res, 'INVALID_TOKEN', 401);
     }
 
-    const user = await User.findById(dataToken._id);
+    const decoded = verifyToken(token);
+
+    if (!decoded?.userId) {
+      return handleHttpError(res, 'INVALID_TOKEN', 401);
+    }
+
+    const user = await User.findById(decoded.userId);
 
     if (!user) {
       return handleHttpError(res, 'USER_NOT_FOUND', 401);
@@ -24,7 +31,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    handleHttpError(res, 'NOT_SESSION', 401);
+    return handleHttpError(res, 'NOT_SESSION', 401);
   }
 };
 

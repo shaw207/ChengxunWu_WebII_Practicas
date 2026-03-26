@@ -98,7 +98,6 @@ router.get('/:id', validate(idParamSchema), getPodcast);
  */
 router.post('/',
   authMiddleware,
-  checkRol(['user', 'admin']),
   validate(createPodcastSchema),
   createPodcast
 );
@@ -142,7 +141,6 @@ router.post('/',
  */
 router.put('/:id',
   authMiddleware,
-  checkRol(['user', 'admin']),
   validate(idParamSchema),
   validate(updatePodcastSchema),
   updatePodcast
@@ -176,7 +174,7 @@ router.put('/:id',
  */
 router.delete('/:id',
   authMiddleware,
-  checkRol(['admin']),
+  checkRol('admin'),
   validate(idParamSchema),
   deletePodcast
 );

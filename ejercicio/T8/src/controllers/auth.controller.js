@@ -6,27 +6,27 @@ import { handleHttpError } from '../utils/handleError.js';
 // POST /api/auth/register
 export const registerCtrl = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return handleHttpError(res, 'EMAIL_ALREADY_EXISTS', 409);
+      return handleHttpError(res, 'EMAIL_ALREADY_EXISTS', 400);
     }
 
-    const password = await encrypt(req.body.password);
-    const body = { ...req.body, password };
+    const hashedPassword = await encrypt(password);
 
-    const user = await User.create(body);
-    user.set('password', undefined, { strict: false });
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword
+    });
 
-    const data = {
+    res.status(201).json({
       token: tokenSign(user),
-      user
-    };
-
-    res.status(201).json(data);
+      user: user.toJSON()
+    });
   } catch (err) {
-    handleHttpError(res, 'ERROR_REGISTER_USER');
+    return handleHttpError(res, 'ERROR_REGISTER_USER');
   }
 };
 
@@ -38,31 +38,29 @@ export const loginCtrl = async (req, res) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
-      return handleHttpError(res, 'USER_NOT_EXISTS', 404);
+      return handleHttpError(res, 'INVALID_CREDENTIALS', 401);
     }
 
-    const checkPassword = await compare(password, user.password);
+    const isValidPassword = await compare(password, user.password);
 
-    if (!checkPassword) {
-      return handleHttpError(res, 'INVALID_PASSWORD', 401);
+    if (!isValidPassword) {
+      return handleHttpError(res, 'INVALID_CREDENTIALS', 401);
     }
 
-    user.set('password', undefined, { strict: false });
-
-    res.json({
+    res.status(201).json({
       token: tokenSign(user),
-      user
+      user: user.toJSON()
     });
   } catch (err) {
-    handleHttpError(res, 'ERROR_LOGIN_USER');
+    return handleHttpError(res, 'ERROR_LOGIN_USER');
   }
 };
 
 // GET /api/auth/me
 export const getMeCtrl = async (req, res) => {
   try {
-    res.json(req.user);
+    return res.status(200).json(req.user.toJSON());
   } catch (err) {
-    handleHttpError(res, 'ERROR_GET_ME');
+    return handleHttpError(res, 'ERROR_GET_ME');
   }
 };

@@ -5,21 +5,22 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+      minlength: 2
     },
     email: {
       type: String,
       required: true,
       unique: true,
-      lowercase: true
+      lowercase: true,
+      trim: true,
+      match: /^\S+@\S+\.\S+$/
     },
     password: {
       type: String,
       required: true,
+      minlength: 8,
       select: false
-    },
-    age: {
-      type: Number
     },
     role: {
       type: String,
@@ -32,5 +33,11 @@ const userSchema = new mongoose.Schema(
     versionKey: false
   }
 );
+
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
 
 export default mongoose.model('User', userSchema);
