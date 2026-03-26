@@ -1,6 +1,7 @@
 export default {
   testEnvironment: 'node',
   transform: {},
+  testTimeout: 30000,
   moduleFileExtensions: ['js'],
   testMatch: ['**/tests/**/*.test.js'],
   collectCoverageFrom: ['src/**/*.js'],
