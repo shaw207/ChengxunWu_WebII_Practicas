@@ -2,11 +2,11 @@
   "name": "t8-docs-testing-monitoring",
   "version": "1.0.0",
   "description": "Documentación Swagger, Testing Jest y Monitorización Slack",
-  "main": "src/app.js",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env src/app.js",
-    "start": "node --env-file=.env src/app.js",
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage"

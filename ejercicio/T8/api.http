@@ -11,7 +11,7 @@ POST {{baseUrl}}/auth/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Juan Pérez",
+  "name": "Juan P茅rez",
   "email": "juan@ejemplo.com",
   "password": "MiPassword123",
   "age": 25
@@ -31,38 +31,38 @@ GET {{baseUrl}}/auth/me HTTP/1.1
 Authorization: Bearer {{token}}
 
 ### =====================
-### TRACKS
+### PODCASTS
 ### =====================
 
-### Listar tracks (público)
-GET {{baseUrl}}/tracks HTTP/1.1
+### Listar podcasts (p煤blico)
+GET {{baseUrl}}/podcasts HTTP/1.1
 
-### Obtener track por ID
-GET {{baseUrl}}/tracks/65f8b3a2c9d1e20012345678 HTTP/1.1
+### Obtener podcast por ID
+GET {{baseUrl}}/podcasts/65f8b3a2c9d1e20012345678 HTTP/1.1
 
-### Crear track (requiere auth)
-POST {{baseUrl}}/tracks HTTP/1.1
+### Crear podcast (requiere auth)
+POST {{baseUrl}}/podcasts HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Mi Canción",
+  "title": "Mi Podcast",
   "duration": 180,
   "genres": ["rock", "pop"]
 }
 
-### Actualizar track
-PUT {{baseUrl}}/tracks/65f8b3a2c9d1e20012345678 HTTP/1.1
+### Actualizar podcast
+PUT {{baseUrl}}/podcasts/65f8b3a2c9d1e20012345678 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Canción Actualizada",
+  "title": "Podcast Actualizado",
   "duration": 200
 }
 
-### Eliminar track (solo admin)
-DELETE {{baseUrl}}/tracks/65f8b3a2c9d1e20012345678 HTTP/1.1
+### Eliminar podcast (solo admin)
+DELETE {{baseUrl}}/podcasts/65f8b3a2c9d1e20012345678 HTTP/1.1
 Authorization: Bearer {{token}}
 
 ### =====================
@@ -70,18 +70,18 @@ Authorization: Bearer {{token}}
 ### =====================
 
 ### Sin token (401)
-POST {{baseUrl}}/tracks HTTP/1.1
+POST {{baseUrl}}/podcasts HTTP/1.1
 Content-Type: application/json
 
 {
   "title": "Sin Auth"
 }
 
-### Token inválido (401)
+### Token inv谩lido (401)
 GET {{baseUrl}}/auth/me HTTP/1.1
 Authorization: Bearer token_invalido
 
-### Validación fallida (400)
+### Validaci贸n fallida (400)
 POST {{baseUrl}}/auth/register HTTP/1.1
 Content-Type: application/json
 

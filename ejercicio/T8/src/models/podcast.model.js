@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const trackSchema = new mongoose.Schema(
+const podcastSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -26,4 +26,4 @@ const trackSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('Track', trackSchema);
+export default mongoose.model('Podcast', podcastSchema);

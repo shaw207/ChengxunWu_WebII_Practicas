@@ -1,14 +1,14 @@
-# T8 - Documentación, Testing y Monitorización
+# T8 - Documentaci贸n, Testing y Monitorizaci贸n
 
 Proyecto que integra Swagger, Jest y notificaciones a Slack.
 
-## Características
+## Caracter铆sticas
 
-- **Swagger**: Documentación interactiva en `/api-docs`
+- **Swagger**: Documentaci贸n interactiva en `/api-docs`
 - **Jest + Supertest**: Tests automatizados
-- **Slack Webhooks**: Notificación de errores en tiempo real
+- **Slack Webhooks**: Notificaci贸n de errores en tiempo real
 
-## Instalación
+## Instalaci贸n
 
 ```bash
 npm install
@@ -19,26 +19,26 @@ npm run dev
 
 ## Endpoints
 
-### Documentación
-| Método | Ruta | Descripción |
+### Documentaci贸n
+| M茅todo | Ruta | Descripci贸n |
 |--------|------|-------------|
 | GET | `/api-docs` | Swagger UI |
 
 ### Auth
-| Método | Ruta | Auth | Descripción |
+| M茅todo | Ruta | Auth | Descripci贸n |
 |--------|------|------|-------------|
 | POST | `/api/auth/register` | No | Registrar usuario |
-| POST | `/api/auth/login` | No | Iniciar sesión |
-| GET | `/api/auth/me` | Sí | Obtener perfil |
+| POST | `/api/auth/login` | No | Iniciar sesi贸n |
+| GET | `/api/auth/me` | S铆 | Obtener perfil |
 
-### Tracks
-| Método | Ruta | Auth | Rol | Descripción |
+### Podcasts
+| M茅todo | Ruta | Auth | Rol | Descripci贸n |
 |--------|------|------|-----|-------------|
-| GET | `/api/tracks` | No | - | Listar tracks |
-| GET | `/api/tracks/:id` | No | - | Obtener track |
-| POST | `/api/tracks` | Sí | user/admin | Crear track |
-| PUT | `/api/tracks/:id` | Sí | user/admin | Actualizar track |
-| DELETE | `/api/tracks/:id` | Sí | admin | Eliminar track |
+| GET | `/api/podcasts` | No | - | Listar podcasts |
+| GET | `/api/podcasts/:id` | No | - | Obtener podcast |
+| POST | `/api/podcasts` | S铆 | user/admin | Crear podcast |
+| PUT | `/api/podcasts/:id` | S铆 | user/admin | Actualizar podcast |
+| DELETE | `/api/podcasts/:id` | S铆 | admin | Eliminar podcast |
 
 ## Testing
 
@@ -55,10 +55,10 @@ npm run test:coverage
 
 ## Variables de Entorno
 
-| Variable | Descripción |
+| Variable | Descripci贸n |
 |----------|-------------|
 | PORT | Puerto del servidor (default: 3000) |
 | DB_URI | URI de MongoDB |
 | JWT_SECRET | Clave secreta para JWT |
-| JWT_EXPIRES_IN | Expiración del token (default: 2h) |
+| JWT_EXPIRES_IN | Expiraci贸n del token (default: 2h) |
 | SLACK_WEBHOOK | URL del webhook de Slack |

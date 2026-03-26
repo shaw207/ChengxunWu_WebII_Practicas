@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import {
-  getTracks,
-  getTrack,
-  createTrack,
-  updateTrack,
-  deleteTrack
-} from '../controllers/tracks.controller.js';
+  getPodcasts,
+  getPodcast,
+  createPodcast,
+  updatePodcast,
+  deletePodcast
+} from '../controllers/podcasts.controller.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { createTrackSchema, updateTrackSchema, idParamSchema } from '../validators/track.validator.js';
+import { createPodcastSchema, updatePodcastSchema, idParamSchema } from '../validators/podcast.validator.js';
 import authMiddleware from '../middleware/session.middleware.js';
 import checkRol from '../middleware/rol.middleware.js';
 
@@ -15,15 +15,15 @@ const router = Router();
 
 /**
  * @openapi
- * /api/tracks:
+ * /api/podcasts:
  *   get:
  *     tags:
- *       - Tracks
- *     summary: Obtener todos los tracks
- *     description: Lista todos los tracks de la base de datos
+ *       - Podcasts
+ *     summary: Obtener todos los podcasts
+ *     description: Lista todos los podcasts de la base de datos
  *     responses:
  *       200:
- *         description: Lista de tracks
+ *         description: Lista de podcasts
  *         content:
  *           application/json:
  *             schema:
@@ -32,39 +32,39 @@ const router = Router();
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/Track'
+ *                     $ref: '#/components/schemas/Podcast'
  */
-router.get('/', getTracks);
+router.get('/', getPodcasts);
 
 /**
  * @openapi
- * /api/tracks/{id}:
+ * /api/podcasts/{id}:
  *   get:
  *     tags:
- *       - Tracks
- *     summary: Obtener track por ID
+ *       - Podcasts
+ *     summary: Obtener podcast por ID
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID del track (MongoDB ObjectId)
+ *         description: ID del podcast (MongoDB ObjectId)
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Track encontrado
+ *         description: Podcast encontrado
  *       404:
- *         description: Track no encontrado
+ *         description: Podcast no encontrado
  */
-router.get('/:id', validate(idParamSchema), getTrack);
+router.get('/:id', validate(idParamSchema), getPodcast);
 
 /**
  * @openapi
- * /api/tracks:
+ * /api/podcasts:
  *   post:
  *     tags:
- *       - Tracks
- *     summary: Crear un track
+ *       - Podcasts
+ *     summary: Crear un podcast
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -79,7 +79,7 @@ router.get('/:id', validate(idParamSchema), getTrack);
  *             properties:
  *               title:
  *                 type: string
- *                 example: Mi Canción
+ *                 example: Mi Podcast
  *               duration:
  *                 type: integer
  *                 example: 180
@@ -90,7 +90,7 @@ router.get('/:id', validate(idParamSchema), getTrack);
  *                 example: ["rock", "pop"]
  *     responses:
  *       201:
- *         description: Track creado
+ *         description: Podcast creado
  *       401:
  *         description: No autorizado
  *       403:
@@ -99,17 +99,17 @@ router.get('/:id', validate(idParamSchema), getTrack);
 router.post('/',
   authMiddleware,
   checkRol(['user', 'admin']),
-  validate(createTrackSchema),
-  createTrack
+  validate(createPodcastSchema),
+  createPodcast
 );
 
 /**
  * @openapi
- * /api/tracks/{id}:
+ * /api/podcasts/{id}:
  *   put:
  *     tags:
- *       - Tracks
- *     summary: Actualizar un track
+ *       - Podcasts
+ *     summary: Actualizar un podcast
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -134,28 +134,28 @@ router.post('/',
  *                   type: string
  *     responses:
  *       200:
- *         description: Track actualizado
+ *         description: Podcast actualizado
  *       401:
  *         description: No autorizado
  *       404:
- *         description: Track no encontrado
+ *         description: Podcast no encontrado
  */
 router.put('/:id',
   authMiddleware,
   checkRol(['user', 'admin']),
   validate(idParamSchema),
-  validate(updateTrackSchema),
-  updateTrack
+  validate(updatePodcastSchema),
+  updatePodcast
 );
 
 /**
  * @openapi
- * /api/tracks/{id}:
+ * /api/podcasts/{id}:
  *   delete:
  *     tags:
- *       - Tracks
- *     summary: Eliminar un track
- *     description: Solo administradores pueden eliminar tracks
+ *       - Podcasts
+ *     summary: Eliminar un podcast
+ *     description: Solo administradores pueden eliminar podcasts
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -166,19 +166,19 @@ router.put('/:id',
  *           type: string
  *     responses:
  *       200:
- *         description: Track eliminado
+ *         description: Podcast eliminado
  *       401:
  *         description: No autorizado
  *       403:
  *         description: Solo administradores
  *       404:
- *         description: Track no encontrado
+ *         description: Podcast no encontrado
  */
 router.delete('/:id',
   authMiddleware,
   checkRol(['admin']),
   validate(idParamSchema),
-  deleteTrack
+  deletePodcast
 );
 
 export default router;

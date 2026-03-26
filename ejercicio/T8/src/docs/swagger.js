@@ -4,9 +4,9 @@ const options = {
   definition: {
     openapi: '3.0.3',
     info: {
-      title: 'API de Tracks - Express con Swagger',
+      title: 'API de Podcasts - Express con Swagger',
       version: '1.0.0',
-      description: 'API REST con documentación Swagger, testing Jest y monitorización Slack',
+      description: 'API REST con documentaci贸n Swagger, testing Jest y monitorizaci贸n Slack',
       license: {
         name: 'MIT',
         url: 'https://spdx.org/licenses/MIT.html'
@@ -32,19 +32,19 @@ const options = {
           required: ['name', 'email', 'password'],
           properties: {
             _id: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
-            name: { type: 'string', example: 'Juan Pérez' },
+            name: { type: 'string', example: 'Juan P茅rez' },
             email: { type: 'string', format: 'email', example: 'juan@ejemplo.com' },
             password: { type: 'string', format: 'password', example: 'MiPassword123' },
             age: { type: 'integer', example: 25 },
             role: { type: 'string', enum: ['user', 'admin'], default: 'user' }
           }
         },
-        Track: {
+        Podcast: {
           type: 'object',
           required: ['title', 'duration'],
           properties: {
             _id: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
-            title: { type: 'string', example: 'Mi Canción' },
+            title: { type: 'string', example: 'Mi Podcast' },
             artist: { type: 'string', example: '65f8b3a2c9d1e20012345678' },
             duration: { type: 'integer', example: 180 },
             genres: {
