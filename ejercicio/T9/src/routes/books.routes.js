@@ -6,13 +6,70 @@ import {
   getBooks,
   updateBook,
 } from '../controllers/books.controller.js';
+import { allowRoles, authRequired } from '../middleware/auth.middleware.js';
+import {
+  bookIdParamsSchema,
+  booksQuerySchema,
+  buildRequestSchema,
+  createBookSchema,
+  updateBookSchema,
+  validate,
+  validateBody,
+} from '../schemas/validation.js';
 
 const router = Router();
 
-router.get('/', getBooks);
-router.get('/:id', getBookById);
-router.post('/', createBook);
-router.put('/:id', updateBook);
-router.delete('/:id', deleteBook);
+router.get(
+  '/',
+  validate(
+    buildRequestSchema({
+      query: booksQuerySchema,
+    }),
+  ),
+  getBooks,
+);
+
+router.get(
+  '/:id',
+  validate(
+    buildRequestSchema({
+      params: bookIdParamsSchema,
+    }),
+  ),
+  getBookById,
+);
+
+router.post(
+  '/',
+  authRequired,
+  allowRoles(['LIBRARIAN', 'ADMIN']),
+  validateBody(createBookSchema),
+  createBook,
+);
+
+router.put(
+  '/:id',
+  authRequired,
+  allowRoles(['LIBRARIAN', 'ADMIN']),
+  validate(
+    buildRequestSchema({
+      params: bookIdParamsSchema,
+      body: updateBookSchema,
+    }),
+  ),
+  updateBook,
+);
+
+router.delete(
+  '/:id',
+  authRequired,
+  allowRoles(['ADMIN']),
+  validate(
+    buildRequestSchema({
+      params: bookIdParamsSchema,
+    }),
+  ),
+  deleteBook,
+);
 
 export default router;
