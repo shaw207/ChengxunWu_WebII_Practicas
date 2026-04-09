@@ -7,6 +7,7 @@ const formatValidationError = (error) =>
   }));
 
 const emptyObjectSchema = z.object({}).passthrough();
+const optionalEmptyObjectSchema = emptyObjectSchema.optional().default({});
 
 export const validate = (schema) => (req, res, next) => {
   try {
@@ -15,18 +16,8 @@ export const validate = (schema) => (req, res, next) => {
       params: req.params,
       query: req.query,
     });
-
-    if (parsed.body) {
-      req.body = parsed.body;
-    }
-
-    if (parsed.params) {
-      req.params = parsed.params;
-    }
-
-    if (parsed.query) {
-      req.query = parsed.query;
-    }
+    req.validated = parsed;
+    req.body = parsed.body;
 
     next();
   } catch (error) {
@@ -45,7 +36,12 @@ export const validate = (schema) => (req, res, next) => {
 
 export const validateBody = (schema) => (req, res, next) => {
   try {
-    req.body = schema.parse(req.body);
+    const parsedBody = schema.parse(req.body);
+    req.body = parsedBody;
+    req.validated = {
+      ...(req.validated ?? {}),
+      body: parsedBody,
+    };
     next();
   } catch (error) {
     if (error instanceof ZodError) {
@@ -62,9 +58,9 @@ export const validateBody = (schema) => (req, res, next) => {
 };
 
 export const buildRequestSchema = ({
-  body = emptyObjectSchema,
-  params = emptyObjectSchema,
-  query = emptyObjectSchema,
+  body = optionalEmptyObjectSchema,
+  params = optionalEmptyObjectSchema,
+  query = optionalEmptyObjectSchema,
 }) =>
   z.object({
     body,

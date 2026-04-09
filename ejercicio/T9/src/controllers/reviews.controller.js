@@ -12,7 +12,8 @@ const reviewInclude = {
 
 export const getBookReviews = async (req, res, next) => {
   try {
-    const bookId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const bookId = params.id;
 
     const [book, reviews, summary] = await Promise.all([
       prisma.book.findUnique({
@@ -59,8 +60,10 @@ export const getBookReviews = async (req, res, next) => {
 
 export const createReview = async (req, res, next) => {
   try {
-    const bookId = req.params.id;
-    const { rating, comment } = req.body;
+    const params = req.validated?.params ?? req.params;
+    const body = req.validated?.body ?? req.body;
+    const bookId = params.id;
+    const { rating, comment } = body;
 
     const [book, returnedLoan, existingReview] = await Promise.all([
       prisma.book.findUnique({
@@ -136,7 +139,8 @@ export const createReview = async (req, res, next) => {
 
 export const deleteReview = async (req, res, next) => {
   try {
-    const reviewId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const reviewId = params.id;
 
     const review = await prisma.review.findUnique({
       where: { id: reviewId },

@@ -87,7 +87,8 @@ export const getAllLoans = async (req, res, next) => {
 
 export const createLoan = async (req, res, next) => {
   try {
-    const { bookId } = req.body;
+    const body = req.validated?.body ?? req.body;
+    const { bookId } = body;
     const dueDate = new Date(Date.now() + loanDurationInDays * 24 * 60 * 60 * 1000);
 
     const loan = await prisma.$transaction(async (tx) => {
@@ -204,7 +205,8 @@ export const createLoan = async (req, res, next) => {
 
 export const returnLoan = async (req, res, next) => {
   try {
-    const loanId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const loanId = params.id;
 
     const result = await prisma.$transaction(async (tx) => {
       const loan = await tx.loan.findUnique({

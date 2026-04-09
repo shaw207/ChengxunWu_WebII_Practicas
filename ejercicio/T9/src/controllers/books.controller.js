@@ -14,6 +14,7 @@ const parseBookPayload = (body) => {
 
 export const getBooks = async (req, res, next) => {
   try {
+    const query = req.validated?.query ?? req.query;
     const {
       author,
       available,
@@ -21,7 +22,7 @@ export const getBooks = async (req, res, next) => {
       limit,
       page,
       search,
-    } = req.query;
+    } = query;
 
     const where = {
       ...(author && {
@@ -93,7 +94,8 @@ export const getBooks = async (req, res, next) => {
 
 export const getBookById = async (req, res, next) => {
   try {
-    const bookId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const bookId = params.id;
 
     const [book, ratingSummary] = await Promise.all([
       prisma.book.findUnique({
@@ -129,7 +131,8 @@ export const getBookById = async (req, res, next) => {
 
 export const createBook = async (req, res, next) => {
   try {
-    const data = parseBookPayload(req.body);
+    const body = req.validated?.body ?? req.body;
+    const data = parseBookPayload(body);
 
     const book = await prisma.book.create({
       data,
@@ -145,7 +148,9 @@ export const createBook = async (req, res, next) => {
 
 export const updateBook = async (req, res, next) => {
   try {
-    const bookId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const body = req.validated?.body ?? req.body;
+    const bookId = params.id;
     const currentBook = await prisma.book.findUnique({
       where: { id: bookId },
     });
@@ -166,10 +171,10 @@ export const updateBook = async (req, res, next) => {
       },
     });
 
-    const nextCopies = req.body.copies ?? currentBook.copies;
+    const nextCopies = body.copies ?? currentBook.copies;
     const nextAvailable =
-      req.body.available ??
-      (req.body.copies !== undefined
+      body.available ??
+      (body.copies !== undefined
         ? nextCopies - activeLoans
         : currentBook.available);
 
@@ -197,7 +202,7 @@ export const updateBook = async (req, res, next) => {
     const book = await prisma.book.update({
       where: { id: bookId },
       data: {
-        ...req.body,
+        ...body,
         available: nextAvailable,
       },
     });
@@ -212,7 +217,8 @@ export const updateBook = async (req, res, next) => {
 
 export const deleteBook = async (req, res, next) => {
   try {
-    const bookId = req.params.id;
+    const params = req.validated?.params ?? req.params;
+    const bookId = params.id;
 
     const currentBook = await prisma.book.findUnique({
       where: { id: bookId },

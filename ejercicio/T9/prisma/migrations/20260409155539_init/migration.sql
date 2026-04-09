@@ -1,106 +1,88 @@
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
+CREATE SCHEMA IF NOT EXISTS "public";
 
--- CreateEnum
-CREATE TYPE "PostStatus" AS ENUM ('DRAFT', 'PUBLISHED', 'ARCHIVED');
+CREATE TYPE "Role" AS ENUM ('USER', 'LIBRARIAN', 'ADMIN');
 
--- CreateTable
+CREATE TYPE "LoanStatus" AS ENUM ('ACTIVE', 'RETURNED', 'OVERDUE');
+
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'USER',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "profiles" (
+CREATE TABLE "books" (
     "id" SERIAL NOT NULL,
-    "bio" TEXT,
-    "avatar" TEXT,
-    "userId" INTEGER NOT NULL,
-
-    CONSTRAINT "profiles_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "posts" (
-    "id" SERIAL NOT NULL,
+    "isbn" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "content" TEXT,
-    "status" "PostStatus" NOT NULL DEFAULT 'DRAFT',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "authorId" INTEGER NOT NULL,
+    "author" TEXT NOT NULL,
+    "genre" TEXT NOT NULL,
+    "description" TEXT,
+    "publishedYear" INTEGER NOT NULL,
+    "copies" INTEGER NOT NULL,
+    "available" INTEGER NOT NULL,
 
-    CONSTRAINT "posts_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "books_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "comments" (
+CREATE TABLE "loans" (
     "id" SERIAL NOT NULL,
-    "content" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "postId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
+    "bookId" INTEGER NOT NULL,
+    "loanDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "dueDate" TIMESTAMP(3) NOT NULL,
+    "returnDate" TIMESTAMP(3),
+    "status" "LoanStatus" NOT NULL DEFAULT 'ACTIVE',
 
-    CONSTRAINT "comments_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "loans_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "tags" (
+CREATE TABLE "reviews" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "bookId" INTEGER NOT NULL,
+    "rating" INTEGER NOT NULL,
+    "comment" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "tags_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "reviews_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "_PostToTag" (
-    "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL,
-
-    CONSTRAINT "_PostToTag_AB_pkey" PRIMARY KEY ("A","B")
-);
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "profiles_userId_key" ON "profiles"("userId");
+CREATE UNIQUE INDEX "books_isbn_key" ON "books"("isbn");
 
--- CreateIndex
-CREATE INDEX "posts_authorId_idx" ON "posts"("authorId");
+CREATE INDEX "books_author_idx" ON "books"("author");
 
--- CreateIndex
-CREATE INDEX "posts_status_idx" ON "posts"("status");
+CREATE INDEX "books_genre_idx" ON "books"("genre");
 
--- CreateIndex
-CREATE INDEX "comments_postId_idx" ON "comments"("postId");
+CREATE INDEX "books_available_idx" ON "books"("available");
 
--- CreateIndex
-CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
+CREATE INDEX "loans_userId_idx" ON "loans"("userId");
 
--- CreateIndex
-CREATE INDEX "_PostToTag_B_index" ON "_PostToTag"("B");
+CREATE INDEX "loans_bookId_idx" ON "loans"("bookId");
 
--- AddForeignKey
-ALTER TABLE "profiles" ADD CONSTRAINT "profiles_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "loans_status_idx" ON "loans"("status");
 
--- AddForeignKey
-ALTER TABLE "posts" ADD CONSTRAINT "posts_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "loans_dueDate_idx" ON "loans"("dueDate");
 
--- AddForeignKey
-ALTER TABLE "comments" ADD CONSTRAINT "comments_postId_fkey" FOREIGN KEY ("postId") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "loans_userId_status_idx" ON "loans"("userId", "status");
 
--- AddForeignKey
-ALTER TABLE "comments" ADD CONSTRAINT "comments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "loans_userId_bookId_status_idx" ON "loans"("userId", "bookId", "status");
 
--- AddForeignKey
-ALTER TABLE "_PostToTag" ADD CONSTRAINT "_PostToTag_A_fkey" FOREIGN KEY ("A") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "reviews_bookId_idx" ON "reviews"("bookId");
 
--- AddForeignKey
-ALTER TABLE "_PostToTag" ADD CONSTRAINT "_PostToTag_B_fkey" FOREIGN KEY ("B") REFERENCES "tags"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX "reviews_rating_idx" ON "reviews"("rating");
+
+CREATE UNIQUE INDEX "reviews_userId_bookId_key" ON "reviews"("userId", "bookId");
+
+ALTER TABLE "loans" ADD CONSTRAINT "loans_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "loans" ADD CONSTRAINT "loans_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "books"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "books"("id") ON DELETE CASCADE ON UPDATE CASCADE;
