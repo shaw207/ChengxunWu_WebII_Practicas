@@ -165,3 +165,12 @@ export const createLoanSchema = z.object({
 export const loanIdParamsSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+export const createReviewSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: descriptionSchema,
+});
+
+export const reviewIdParamsSchema = z.object({
+  id: z.coerce.number().int().positive(),
+});
