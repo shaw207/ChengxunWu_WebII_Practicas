@@ -157,3 +157,11 @@ export const updateBookSchema = z
       });
     }
   });
+
+export const createLoanSchema = z.object({
+  bookId: z.coerce.number().int().positive(),
+});
+
+export const loanIdParamsSchema = z.object({
+  id: z.coerce.number().int().positive(),
+});
