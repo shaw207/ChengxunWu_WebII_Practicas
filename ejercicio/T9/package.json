@@ -1,5 +1,5 @@
 {
-  "name": "t9-prisma-example",
+  "name": "t9-library-api",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -8,7 +8,9 @@
     "db:migrate": "npx prisma migrate dev",
     "db:push": "npx prisma db push",
     "db:studio": "npx prisma studio",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

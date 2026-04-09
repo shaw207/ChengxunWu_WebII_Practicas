@@ -1,23 +1,18 @@
-// src/config/prisma.js
-// Singleton del cliente Prisma
-
 import { PrismaClient } from '@prisma/client';
 
-// Crear una única instancia
-const prisma = new PrismaClient({
-  log: process.env.NODE_ENV === 'development'
-    ? ['query', 'info', 'warn', 'error']
-    : ['error']
-});
+const prismaClientSingleton = () =>
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'warn', 'error']
+        : ['error'],
+  });
 
-// Middleware para logging de queries (opcional)
-prisma.$use(async (params, next) => {
-  const before = Date.now();
-  const result = await next(params);
-  const after = Date.now();
+const globalForPrisma = globalThis;
+const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
-  console.log(`Query ${params.model}.${params.action} took ${after - before}ms`);
-  return result;
-});
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 export default prisma;
