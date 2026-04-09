@@ -1,6 +1,3 @@
-// Prisma Schema - Ejemplo T9
-// Documentación: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,96 +8,81 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ==================== ENUMS ====================
-
 enum Role {
   USER
+  LIBRARIAN
   ADMIN
 }
 
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
 }
 
-// ==================== MODELS ====================
-
-// Modelo de Usuario
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relaciones
-  posts    Post[]
-  comments Comment[]
-  profile  Profile?
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  role     Role     @default(USER)
+  loans    Loan[]
+  reviews  Review[]
 
   @@map("users")
 }
 
-// Modelo de Perfil (relación 1:1)
-model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String? @db.Text
-  avatar String?
+model Book {
+  id            Int      @id @default(autoincrement())
+  isbn          String   @unique
+  title         String
+  author        String
+  genre         String
+  description   String?  @db.Text
+  publishedYear Int
+  copies        Int
+  available     Int
+  loans         Loan[]
+  reviews       Review[]
 
-  // Relación con User
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int  @unique
-
-  @@map("profiles")
+  @@index([author])
+  @@index([genre])
+  @@index([available])
+  @@map("books")
 }
 
-// Modelo de Post (relación 1:N con User)
-model Post {
-  id        Int        @id @default(autoincrement())
-  title     String
-  content   String?    @db.Text
-  status    PostStatus @default(DRAFT)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+model Loan {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  bookId     Int
+  loanDate   DateTime   @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     LoanStatus @default(ACTIVE)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book       Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  // Relación con User
-  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId Int
-
-  // Relación con Comments
-  comments Comment[]
-
-  // Relación N:M con Tags
-  tags Tag[]
-
-  @@index([authorId])
+  @@index([userId])
+  @@index([bookId])
   @@index([status])
-  @@map("posts")
+  @@index([dueDate])
+  @@index([userId, status])
+  @@index([userId, bookId, status])
+  @@map("loans")
 }
 
-// Modelo de Comentario
-model Comment {
+model Review {
   id        Int      @id @default(autoincrement())
-  content   String
+  userId    Int
+  bookId    Int
+  rating    Int
+  comment   String?  @db.Text
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
-  // Relaciones
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
-
-  @@index([postId])
-  @@map("comments")
-}
-
-// Modelo de Tag (relación N:M con Post)
-model Tag {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  posts Post[]
-
-  @@map("tags")
+  @@unique([userId, bookId])
+  @@index([bookId])
+  @@index([rating])
+  @@map("reviews")
 }
