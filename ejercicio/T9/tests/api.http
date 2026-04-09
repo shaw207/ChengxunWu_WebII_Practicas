@@ -10,6 +10,14 @@ GET {{baseUrl}}/health
 
 ###
 
+GET {{baseUrl}}/api-docs.json
+
+###
+
+GET {{baseUrl}}/api-docs
+
+###
+
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
@@ -41,6 +49,11 @@ GET {{baseUrl}}/api/books?page=1&limit=10
 ###
 
 GET {{baseUrl}}/api/books?genre=Classic&available=true&page=1&limit=10
+
+###
+
+GET {{baseUrl}}/api/books/stats?limit=5
+Authorization: Bearer {{librarianToken}}
 
 ###
 

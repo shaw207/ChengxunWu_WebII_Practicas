@@ -5,7 +5,9 @@ import authRoutes from './routes/auth.routes.js';
 import booksRoutes from './routes/books.routes.js';
 import loansRoutes from './routes/loans.routes.js';
 import reviewsRoutes from './routes/reviews.routes.js';
+import { swaggerDocument, swaggerUiServe, swaggerUiSetup } from './config/swagger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
+import { startOverdueNotifier } from './utils/overdue.js';
 
 const app = express();
 
@@ -28,6 +30,12 @@ app.get('/health', async (req, res) => {
   }
 });
 
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerDocument);
+});
+
+app.use('/api-docs', swaggerUiServe, swaggerUiSetup);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/loans', loansRoutes);
@@ -41,6 +49,8 @@ const isDirectRun =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectRun) {
+  startOverdueNotifier(prisma);
+
   const server = app.listen(PORT, () => {
     console.log(`Servidor en http://localhost:${PORT}`);
   });

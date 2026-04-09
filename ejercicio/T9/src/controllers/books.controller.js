@@ -129,6 +129,104 @@ export const getBookById = async (req, res, next) => {
   }
 };
 
+export const getBookStats = async (req, res, next) => {
+  try {
+    const query = req.validated?.query ?? req.query;
+    const limit = query.limit;
+
+    const [totals, topBorrowedRaw, topRatedRaw] = await Promise.all([
+      Promise.all([
+        prisma.book.count(),
+        prisma.loan.count(),
+        prisma.loan.count({
+          where: {
+            status: 'ACTIVE',
+          },
+        }),
+        prisma.loan.count({
+          where: {
+            status: 'OVERDUE',
+          },
+        }),
+        prisma.review.count(),
+      ]),
+      prisma.loan.groupBy({
+        by: ['bookId'],
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _count: {
+            id: 'desc',
+          },
+        },
+        take: limit,
+      }),
+      prisma.review.groupBy({
+        by: ['bookId'],
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          id: true,
+        },
+        orderBy: {
+          _avg: {
+            rating: 'desc',
+          },
+        },
+        take: limit,
+      }),
+    ]);
+
+    const topBorrowedIds = topBorrowedRaw.map((item) => item.bookId);
+    const topRatedIds = topRatedRaw.map((item) => item.bookId);
+
+    const [topBorrowedBooks, topRatedBooks] = await Promise.all([
+      prisma.book.findMany({
+        where: {
+          id: {
+            in: topBorrowedIds,
+          },
+        },
+      }),
+      prisma.book.findMany({
+        where: {
+          id: {
+            in: topRatedIds,
+          },
+        },
+      }),
+    ]);
+
+    const borrowedMap = new Map(topBorrowedBooks.map((book) => [book.id, book]));
+    const ratedMap = new Map(topRatedBooks.map((book) => [book.id, book]));
+
+    res.json({
+      data: {
+        totals: {
+          books: totals[0],
+          loans: totals[1],
+          activeLoans: totals[2],
+          overdueLoans: totals[3],
+          reviews: totals[4],
+        },
+        mostBorrowed: topBorrowedRaw.map((item) => ({
+          ...borrowedMap.get(item.bookId),
+          loanCount: item._count.id,
+        })),
+        topRated: topRatedRaw.map((item) => ({
+          ...ratedMap.get(item.bookId),
+          averageRating: item._avg.rating,
+          reviewCount: item._count.id,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createBook = async (req, res, next) => {
   try {
     const body = req.validated?.body ?? req.body;

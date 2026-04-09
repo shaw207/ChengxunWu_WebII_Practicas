@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { markOverdueLoans } from '../utils/overdue.js';
 
 const borrowedStatuses = ['ACTIVE', 'OVERDUE'];
 const loanDurationInDays = 14;
@@ -29,24 +30,9 @@ const adminLoanInclude = {
   },
 };
 
-const syncOverdueLoans = async () => {
-  await prisma.loan.updateMany({
-    where: {
-      status: 'ACTIVE',
-      returnDate: null,
-      dueDate: {
-        lt: new Date(),
-      },
-    },
-    data: {
-      status: 'OVERDUE',
-    },
-  });
-};
-
 export const getMyLoans = async (req, res, next) => {
   try {
-    await syncOverdueLoans();
+    await markOverdueLoans(prisma);
 
     const loans = await prisma.loan.findMany({
       where: {
@@ -68,7 +54,7 @@ export const getMyLoans = async (req, res, next) => {
 
 export const getAllLoans = async (req, res, next) => {
   try {
-    await syncOverdueLoans();
+    await markOverdueLoans(prisma);
 
     const loans = await prisma.loan.findMany({
       include: adminLoanInclude,

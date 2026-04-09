@@ -105,6 +105,10 @@ export const booksQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(10),
 });
 
+export const statsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(10).default(5),
+});
+
 export const createBookSchema = z
   .object({
     isbn: z.string().trim().min(10).max(20),

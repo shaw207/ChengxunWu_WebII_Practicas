@@ -4,6 +4,7 @@ import {
   deleteBook,
   getBookById,
   getBooks,
+  getBookStats,
   updateBook,
 } from '../controllers/books.controller.js';
 import { allowRoles, authRequired } from '../middleware/auth.middleware.js';
@@ -12,6 +13,7 @@ import {
   booksQuerySchema,
   buildRequestSchema,
   createBookSchema,
+  statsQuerySchema,
   updateBookSchema,
   validate,
   validateBody,
@@ -27,6 +29,18 @@ router.get(
     }),
   ),
   getBooks,
+);
+
+router.get(
+  '/stats',
+  authRequired,
+  allowRoles(['LIBRARIAN', 'ADMIN']),
+  validate(
+    buildRequestSchema({
+      query: statsQuerySchema,
+    }),
+  ),
+  getBookStats,
 );
 
 router.get(
