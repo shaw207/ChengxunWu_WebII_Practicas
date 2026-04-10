@@ -6,7 +6,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '2h';
 export function signToken(user) {
   return jwt.sign(
     {
-      id: user.id,
+      id: user._id?.toString?.() || user.id,
       name: user.name,
       email: user.email
     },

@@ -28,7 +28,6 @@ const roomSchema = new mongoose.Schema(
   }
 );
 
-roomSchema.index({ name: 1 }, { unique: true });
 roomSchema.index({ createdBy: 1, createdAt: -1 });
 
 const Room = mongoose.models.Room || mongoose.model('Room', roomSchema);

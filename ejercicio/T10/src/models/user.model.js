@@ -30,8 +30,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ email: 1 }, { unique: true });
-
 userSchema.methods.toJSON = function toJSON() {
   const user = this.toObject();
   delete user.password;
