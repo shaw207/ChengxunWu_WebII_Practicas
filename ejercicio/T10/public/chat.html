@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T10 - Sala de Chat</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #eef2ff;
+      color: #0f172a;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 260px 1fr 260px;
+    }
+    .panel {
+      background: #ffffff;
+      border: 1px solid #dbe4f0;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    }
+    h1, h2 { margin-bottom: 16px; }
+    ul { list-style: none; display: grid; gap: 10px; }
+    li, .message {
+      padding: 12px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .chat {
+      display: grid;
+      gap: 16px;
+    }
+    .messages {
+      min-height: 360px;
+      display: grid;
+      gap: 12px;
+    }
+    .toolbar, form {
+      display: grid;
+      gap: 12px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      font: inherit;
+    }
+    button {
+      border: none;
+      background: #1d4ed8;
+      color: #ffffff;
+    }
+    .muted { color: #64748b; }
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="panel">
+      <h2>Salas</h2>
+      <ul>
+        <li>Sala general</li>
+        <li>Soporte</li>
+        <li>Proyecto</li>
+      </ul>
+    </aside>
+
+    <main class="panel chat">
+      <div class="toolbar">
+        <h1>Interfaz de Chat</h1>
+        <p class="muted">
+          Estructura preparada. En los siguientes pasos conectaremos historial,
+          mensajes en tiempo real y indicador de escritura.
+        </p>
+      </div>
+
+      <section class="messages">
+        <article class="message">Los mensajes apareceran aqui.</article>
+        <article class="message">El historial real se cargara mas adelante.</article>
+      </section>
+
+      <form>
+        <textarea rows="3" placeholder="Escribe un mensaje..." disabled></textarea>
+        <button type="button" disabled>Enviar mensaje</button>
+      </form>
+    </main>
+
+    <aside class="panel">
+      <h2>Usuarios en sala</h2>
+      <ul>
+        <li>Lista pendiente de conectar</li>
+        <li>Presencia online pendiente</li>
+      </ul>
+    </aside>
+  </div>
+</body>
+</html>
