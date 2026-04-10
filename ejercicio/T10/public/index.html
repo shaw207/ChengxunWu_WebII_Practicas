@@ -8,85 +8,340 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, sans-serif;
-      background: #f4f7fb;
-      color: #1f2937;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.16), transparent 25%),
+        #eef4ff;
+      color: #122033;
       min-height: 100vh;
       display: grid;
       place-items: center;
       padding: 24px;
     }
     main {
-      width: min(960px, 100%);
+      width: min(1120px, 100%);
       display: grid;
       gap: 24px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: 1.1fr 1fr 1fr;
     }
     .panel {
-      background: #ffffff;
-      border: 1px solid #dbe4f0;
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      border-radius: 22px;
       padding: 24px;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(12px);
     }
-    h1, h2 { margin-bottom: 16px; }
-    p { margin-bottom: 12px; line-height: 1.5; }
+    h1, h2 { margin-bottom: 14px; }
+    h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.05; }
+    p { line-height: 1.6; color: #334155; }
+    .stack { display: grid; gap: 14px; }
+    .hero { display: grid; gap: 18px; align-content: start; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
     form { display: grid; gap: 12px; }
+    label { display: grid; gap: 6px; font-size: 0.94rem; color: #334155; }
     input {
       width: 100%;
-      padding: 12px;
+      padding: 13px 14px;
       border: 1px solid #cbd5e1;
-      border-radius: 10px;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #0f172a;
     }
-    button, a {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px 16px;
-      border-radius: 10px;
+    button {
       border: none;
-      background: #0f172a;
+      border-radius: 12px;
+      padding: 13px 16px;
+      background: linear-gradient(135deg, #1d4ed8, #0f172a);
       color: #ffffff;
-      text-decoration: none;
+      font-weight: 600;
       cursor: pointer;
     }
-    .muted {
-      color: #64748b;
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .session-card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+    }
+    .session-card strong {
+      font-size: 1.05rem;
+      color: #0f172a;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .message {
+      min-height: 22px;
       font-size: 0.95rem;
+    }
+    .success { color: #166534; }
+    .error { color: #b91c1c; }
+    .muted { color: #64748b; }
+    .hidden { display: none; }
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <main>
-    <section class="panel">
-      <h1>Chat en Tiempo Real</h1>
-      <p>
-        Esta pagina queda reservada para el acceso del usuario. En los
-        siguientes pasos conectaremos estos formularios con las rutas REST de
-        autenticacion y luego con Socket.IO.
-      </p>
-      <a href="/chat.html">Abrir interfaz de chat</a>
+    <section class="panel hero">
+      <div class="pill-row">
+        <span class="pill">Express</span>
+        <span class="pill">MongoDB</span>
+        <span class="pill">Socket.IO</span>
+        <span class="pill">JWT</span>
+      </div>
+      <div class="stack">
+        <h1>Acceso al chat en tiempo real</h1>
+        <p>
+          Desde esta pagina puedes crear tu cuenta o iniciar sesion. Cuando la
+          autenticacion sea correcta, guardaremos tu token localmente y te
+          llevaremos a la interfaz del chat.
+        </p>
+      </div>
+      <div id="sessionPanel" class="session-card hidden">
+        <strong id="sessionName"></strong>
+        <span id="sessionEmail" class="muted"></span>
+        <div class="row">
+          <button id="continueButton" type="button">Entrar al chat</button>
+          <button id="logoutButton" type="button" class="secondary">Cerrar sesion</button>
+        </div>
+      </div>
+      <p id="sessionMessage" class="message muted"></p>
     </section>
 
-    <section class="panel">
-      <h2>Login</h2>
-      <form>
-        <input type="email" placeholder="Email" disabled>
-        <input type="password" placeholder="Password" disabled>
-        <button type="button" disabled>Iniciar sesion</button>
+    <section class="panel stack">
+      <div>
+        <h2>Login</h2>
+        <p class="muted">Usa un usuario existente para conectarte.</p>
+      </div>
+      <form id="loginForm">
+        <label>
+          Email
+          <input id="loginEmail" type="email" placeholder="tu@email.com" required>
+        </label>
+        <label>
+          Password
+          <input id="loginPassword" type="password" placeholder="Password123" required>
+        </label>
+        <button id="loginButton" type="submit">Iniciar sesion</button>
       </form>
-      <p class="muted">Se conectara en el paso de autenticacion.</p>
+      <p id="loginMessage" class="message muted"></p>
     </section>
 
-    <section class="panel">
-      <h2>Registro</h2>
-      <form>
-        <input type="text" placeholder="Nombre" disabled>
-        <input type="email" placeholder="Email" disabled>
-        <input type="password" placeholder="Password" disabled>
-        <button type="button" disabled>Crear cuenta</button>
+    <section class="panel stack">
+      <div>
+        <h2>Registro</h2>
+        <p class="muted">Crea una cuenta nueva y entra directamente al chat.</p>
+      </div>
+      <form id="registerForm">
+        <label>
+          Nombre
+          <input id="registerName" type="text" placeholder="Tu nombre" required>
+        </label>
+        <label>
+          Email
+          <input id="registerEmail" type="email" placeholder="tu@email.com" required>
+        </label>
+        <label>
+          Password
+          <input id="registerPassword" type="password" placeholder="Minimo 8 caracteres" required>
+        </label>
+        <button id="registerButton" type="submit">Crear cuenta</button>
       </form>
-      <p class="muted">Se conectara en el paso de autenticacion.</p>
+      <p id="registerMessage" class="message muted"></p>
     </section>
   </main>
+
+  <script>
+    const STORAGE_KEY = 't10-chat-session';
+
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const loginMessage = document.getElementById('loginMessage');
+    const registerMessage = document.getElementById('registerMessage');
+    const sessionPanel = document.getElementById('sessionPanel');
+    const sessionName = document.getElementById('sessionName');
+    const sessionEmail = document.getElementById('sessionEmail');
+    const sessionMessage = document.getElementById('sessionMessage');
+    const continueButton = document.getElementById('continueButton');
+    const logoutButton = document.getElementById('logoutButton');
+
+    function readSession() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeSession(session) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    }
+
+    function clearSession() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    function setMessage(element, text, type) {
+      element.textContent = text || '';
+      element.className = `message ${type || 'muted'}`;
+    }
+
+    function setFormBusy(form, busy) {
+      form.querySelectorAll('input, button').forEach((element) => {
+        element.disabled = busy;
+      });
+    }
+
+    async function requestJson(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error inesperado');
+      }
+
+      return data;
+    }
+
+    function renderSession(user) {
+      if (!user) {
+        sessionPanel.classList.add('hidden');
+        sessionName.textContent = '';
+        sessionEmail.textContent = '';
+        return;
+      }
+
+      sessionPanel.classList.remove('hidden');
+      sessionName.textContent = user.name;
+      sessionEmail.textContent = user.email;
+    }
+
+    async function hydrateSession() {
+      const session = readSession();
+
+      if (!session?.token) {
+        renderSession(null);
+        setMessage(sessionMessage, 'No hay una sesion activa todavia.', 'muted');
+        return;
+      }
+
+      try {
+        const data = await requestJson('/api/auth/me', {
+          headers: {
+            Authorization: `Bearer ${session.token}`
+          }
+        });
+
+        writeSession({
+          token: session.token,
+          user: data.user
+        });
+
+        renderSession(data.user);
+        setMessage(sessionMessage, 'Sesion valida. Puedes entrar directamente al chat.', 'success');
+      } catch (error) {
+        clearSession();
+        renderSession(null);
+        setMessage(sessionMessage, 'La sesion guardada ya no es valida. Inicia sesion otra vez.', 'error');
+      }
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setMessage(loginMessage, '', 'muted');
+      setFormBusy(loginForm, true);
+
+      try {
+        const data = await requestJson('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value
+          })
+        });
+
+        writeSession(data);
+        renderSession(data.user);
+        setMessage(loginMessage, 'Login correcto. Redirigiendo al chat...', 'success');
+        setMessage(sessionMessage, 'Sesion iniciada correctamente.', 'success');
+        setTimeout(() => {
+          window.location.href = '/chat.html';
+        }, 500);
+      } catch (error) {
+        setMessage(loginMessage, error.message, 'error');
+      } finally {
+        setFormBusy(loginForm, false);
+      }
+    });
+
+    registerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setMessage(registerMessage, '', 'muted');
+      setFormBusy(registerForm, true);
+
+      try {
+        const data = await requestJson('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: document.getElementById('registerName').value,
+            email: document.getElementById('registerEmail').value,
+            password: document.getElementById('registerPassword').value
+          })
+        });
+
+        writeSession(data);
+        renderSession(data.user);
+        setMessage(registerMessage, 'Cuenta creada. Redirigiendo al chat...', 'success');
+        setMessage(sessionMessage, 'Registro correcto. La sesion quedo iniciada.', 'success');
+        setTimeout(() => {
+          window.location.href = '/chat.html';
+        }, 500);
+      } catch (error) {
+        setMessage(registerMessage, error.message, 'error');
+      } finally {
+        setFormBusy(registerForm, false);
+      }
+    });
+
+    continueButton.addEventListener('click', () => {
+      window.location.href = '/chat.html';
+    });
+
+    logoutButton.addEventListener('click', () => {
+      clearSession();
+      renderSession(null);
+      setMessage(sessionMessage, 'La sesion local fue cerrada.', 'muted');
+    });
+
+    hydrateSession();
+  </script>
 </body>
 </html>

@@ -34,6 +34,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomsRoutes);
 
 const PORT = Number(process.env.PORT) || 3000;
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filename;
 
 async function startServer() {
   await connectDB();
@@ -43,9 +44,11 @@ async function startServer() {
   });
 }
 
-startServer().catch((error) => {
-  console.error('Error starting server:', error.message);
-  process.exit(1);
-});
+if (isDirectRun) {
+  startServer().catch((error) => {
+    console.error('Error starting server:', error.message);
+    process.exit(1);
+  });
+}
 
 export { app, httpServer, io, startServer };

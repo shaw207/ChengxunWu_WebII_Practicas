@@ -8,104 +8,807 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, sans-serif;
-      background: #eef2ff;
-      color: #0f172a;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.14), transparent 24%),
+        #eef4ff;
+      color: #122033;
       min-height: 100vh;
       padding: 24px;
     }
     .layout {
-      max-width: 1200px;
+      max-width: 1380px;
       margin: 0 auto;
       display: grid;
-      gap: 20px;
-      grid-template-columns: 260px 1fr 260px;
+      gap: 18px;
+      grid-template-columns: 320px minmax(0, 1fr) 290px;
+      align-items: start;
     }
     .panel {
-      background: #ffffff;
-      border: 1px solid #dbe4f0;
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(191, 219, 254, 0.9);
+      border-radius: 22px;
       padding: 20px;
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+      backdrop-filter: blur(12px);
     }
-    h1, h2 { margin-bottom: 16px; }
-    ul { list-style: none; display: grid; gap: 10px; }
-    li, .message {
-      padding: 12px;
-      border-radius: 12px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-    }
-    .chat {
-      display: grid;
-      gap: 16px;
-    }
-    .messages {
-      min-height: 360px;
-      display: grid;
+    .stack { display: grid; gap: 14px; }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
-    .toolbar, form {
-      display: grid;
-      gap: 12px;
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
+    .status.connected {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status.disconnected {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    h1, h2, h3 { color: #0f172a; }
+    p, span, small { color: #475569; }
+    form { display: grid; gap: 12px; }
     input, textarea, button {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
       border: 1px solid #cbd5e1;
       font: inherit;
     }
+    textarea {
+      resize: vertical;
+      min-height: 96px;
+    }
     button {
       border: none;
-      background: #1d4ed8;
+      background: linear-gradient(135deg, #1d4ed8, #0f172a);
       color: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .room-list, .user-list, .activity-list {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .room-card, .user-card, .activity-card {
+      border: 1px solid #dbeafe;
+      background: #f8fbff;
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .room-card.active {
+      border-color: #1d4ed8;
+      background: #dbeafe;
+    }
+    .room-card button {
+      margin-top: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+    .user-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .online-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .online-badge.online {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .chat-panel {
+      display: grid;
+      gap: 16px;
+    }
+    .chat-toolbar {
+      display: grid;
+      gap: 10px;
+    }
+    .toolbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .messages {
+      min-height: 460px;
+      max-height: 62vh;
+      overflow-y: auto;
+      display: grid;
+      gap: 12px;
+      padding-right: 4px;
+    }
+    .message-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+    .message-card.self {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+    .message-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      color: #475569;
+    }
+    .typing {
+      min-height: 22px;
+      color: #2563eb;
+      font-size: 0.95rem;
     }
     .muted { color: #64748b; }
-    @media (max-width: 980px) {
+    .message {
+      min-height: 20px;
+      font-size: 0.95rem;
+    }
+    .success { color: #166534; }
+    .error { color: #b91c1c; }
+    .empty {
+      padding: 18px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: #64748b;
+    }
+    @media (max-width: 1120px) {
       .layout {
         grid-template-columns: 1fr;
+      }
+      .messages {
+        max-height: none;
       }
     }
   </style>
 </head>
 <body>
   <div class="layout">
-    <aside class="panel">
-      <h2>Salas</h2>
-      <ul>
-        <li>Sala general</li>
-        <li>Soporte</li>
-        <li>Proyecto</li>
-      </ul>
-    </aside>
-
-    <main class="panel chat">
-      <div class="toolbar">
-        <h1>Interfaz de Chat</h1>
-        <p class="muted">
-          Estructura preparada. En los siguientes pasos conectaremos historial,
-          mensajes en tiempo real y indicador de escritura.
-        </p>
+    <aside class="panel stack">
+      <div class="header">
+        <div>
+          <h2>Salas</h2>
+          <p class="muted">Explora y crea salas disponibles.</p>
+        </div>
+        <button id="refreshRoomsButton" type="button" class="secondary">Actualizar</button>
       </div>
 
-      <section class="messages">
-        <article class="message">Los mensajes apareceran aqui.</article>
-        <article class="message">El historial real se cargara mas adelante.</article>
-      </section>
+      <form id="createRoomForm">
+        <input id="roomNameInput" type="text" placeholder="Nombre de la sala" required>
+        <input id="roomDescriptionInput" type="text" placeholder="Descripcion breve">
+        <button id="createRoomButton" type="submit">Crear sala</button>
+      </form>
 
-      <form>
-        <textarea rows="3" placeholder="Escribe un mensaje..." disabled></textarea>
-        <button type="button" disabled>Enviar mensaje</button>
+      <p id="roomsMessage" class="message muted"></p>
+      <ul id="roomsList" class="room-list"></ul>
+    </aside>
+
+    <main class="panel chat-panel">
+      <div class="chat-toolbar">
+        <div class="toolbar-top">
+          <div>
+            <h1 id="chatTitle">Selecciona una sala</h1>
+            <p id="chatSubtitle" class="muted">Necesitas unirte a una sala para empezar a chatear.</p>
+          </div>
+          <span id="connectionStatus" class="status disconnected">Desconectado</span>
+        </div>
+        <div class="header">
+          <div>
+            <strong id="currentUserName"></strong>
+            <p id="currentUserEmail" class="muted"></p>
+          </div>
+          <div class="header">
+            <button id="backButton" type="button" class="secondary">Volver</button>
+            <button id="logoutButton" type="button" class="secondary">Cerrar sesion</button>
+          </div>
+        </div>
+      </div>
+
+      <p id="chatMessage" class="message muted"></p>
+      <div id="typingIndicator" class="typing"></div>
+      <section id="messagesList" class="messages"></section>
+
+      <form id="messageForm">
+        <textarea id="messageInput" placeholder="Escribe un mensaje..." required></textarea>
+        <button id="sendMessageButton" type="submit">Enviar mensaje</button>
       </form>
     </main>
 
-    <aside class="panel">
-      <h2>Usuarios en sala</h2>
-      <ul>
-        <li>Lista pendiente de conectar</li>
-        <li>Presencia online pendiente</li>
-      </ul>
+    <aside class="panel stack">
+      <div>
+        <h2>Usuarios en sala</h2>
+        <p id="usersSummary" class="muted">Sin sala activa.</p>
+      </div>
+      <ul id="usersList" class="user-list"></ul>
+
+      <div>
+        <h3>Actividad</h3>
+        <p class="muted">Eventos recientes de la sesion.</p>
+      </div>
+      <ul id="activityList" class="activity-list"></ul>
     </aside>
   </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const STORAGE_KEY = 't10-chat-session';
+    const ACTIVE_ROOM_STORAGE_KEY = 't10-chat-active-room';
+
+    const state = {
+      session: null,
+      socket: null,
+      rooms: [],
+      activeRoom: null,
+      messages: [],
+      roomUsers: new Map(),
+      onlineUserIds: new Set(),
+      typingTimerId: null,
+      lastTypingSentAt: 0
+    };
+
+    const roomsList = document.getElementById('roomsList');
+    const roomsMessage = document.getElementById('roomsMessage');
+    const createRoomForm = document.getElementById('createRoomForm');
+    const roomNameInput = document.getElementById('roomNameInput');
+    const roomDescriptionInput = document.getElementById('roomDescriptionInput');
+    const refreshRoomsButton = document.getElementById('refreshRoomsButton');
+    const currentUserName = document.getElementById('currentUserName');
+    const currentUserEmail = document.getElementById('currentUserEmail');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const chatTitle = document.getElementById('chatTitle');
+    const chatSubtitle = document.getElementById('chatSubtitle');
+    const chatMessage = document.getElementById('chatMessage');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const messagesList = document.getElementById('messagesList');
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+    const usersList = document.getElementById('usersList');
+    const usersSummary = document.getElementById('usersSummary');
+    const activityList = document.getElementById('activityList');
+    const logoutButton = document.getElementById('logoutButton');
+    const backButton = document.getElementById('backButton');
+
+    function readSession() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function writeSession(session) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    }
+
+    function clearSession() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+
+    function readActiveRoomId() {
+      return localStorage.getItem(ACTIVE_ROOM_STORAGE_KEY);
+    }
+
+    function writeActiveRoomId(roomId) {
+      if (roomId) {
+        localStorage.setItem(ACTIVE_ROOM_STORAGE_KEY, roomId);
+      }
+    }
+
+    function clearActiveRoomId() {
+      localStorage.removeItem(ACTIVE_ROOM_STORAGE_KEY);
+    }
+
+    function setMessage(element, text, type) {
+      element.textContent = text || '';
+      element.className = `message ${type || 'muted'}`;
+    }
+
+    function setBusy(form, busy) {
+      form.querySelectorAll('input, textarea, button').forEach((element) => {
+        element.disabled = busy;
+      });
+    }
+
+    function formatTime(value) {
+      return new Date(value).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function redirectToLogin() {
+      window.location.href = '/';
+    }
+
+    async function requestJson(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: state.session?.token ? `Bearer ${state.session.token}` : '',
+          ...(options.headers || {})
+        }
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 401) {
+        clearSession();
+        redirectToLogin();
+        throw new Error('Sesion no valida');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error inesperado');
+      }
+
+      return data;
+    }
+
+    function addActivity(text) {
+      const item = document.createElement('li');
+      item.className = 'activity-card';
+      item.textContent = `${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${text}`;
+      activityList.prepend(item);
+
+      while (activityList.children.length > 8) {
+        activityList.removeChild(activityList.lastChild);
+      }
+    }
+
+    function renderRooms() {
+      roomsList.innerHTML = '';
+
+      if (!state.rooms.length) {
+        roomsList.innerHTML = '<li class="empty">Todavia no hay salas creadas.</li>';
+        return;
+      }
+
+      state.rooms.forEach((room) => {
+        const item = document.createElement('li');
+        item.className = `room-card${state.activeRoom?.id === room.id ? ' active' : ''}`;
+        item.innerHTML = `
+          <strong>${escapeHtml(room.name)}</strong>
+          <p>${escapeHtml(room.description || 'Sin descripcion')}</p>
+          <small>Creada por ${escapeHtml(room.createdBy?.name || 'Desconocido')}</small>
+          <button type="button" data-room-id="${room.id}">
+            ${state.activeRoom?.id === room.id ? 'Sala activa' : 'Entrar a la sala'}
+          </button>
+        `;
+        roomsList.appendChild(item);
+      });
+    }
+
+    function renderMessages() {
+      messagesList.innerHTML = '';
+
+      if (!state.activeRoom) {
+        messagesList.innerHTML = '<div class="empty">Selecciona una sala para ver su historial y mensajes en tiempo real.</div>';
+        return;
+      }
+
+      if (!state.messages.length) {
+        messagesList.innerHTML = '<div class="empty">Todavia no hay mensajes en esta sala.</div>';
+        return;
+      }
+
+      state.messages.forEach((message) => {
+        const article = document.createElement('article');
+        const isSelf = message.user?.id === state.session.user.id;
+        article.className = `message-card${isSelf ? ' self' : ''}`;
+        article.innerHTML = `
+          <div class="message-meta">
+            <strong>${escapeHtml(message.user?.name || 'Usuario')}</strong>
+            <span>${formatTime(message.timestamp)}</span>
+          </div>
+          <div>${escapeHtml(message.content)}</div>
+        `;
+        messagesList.appendChild(article);
+      });
+
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+
+    function renderRoomUsers() {
+      usersList.innerHTML = '';
+
+      const users = Array.from(state.roomUsers.values());
+
+      if (!state.activeRoom || !users.length) {
+        usersSummary.textContent = 'Sin sala activa.';
+        usersList.innerHTML = '<li class="empty">Aqui veras los usuarios conectados en la sala actual.</li>';
+        return;
+      }
+
+      const onlineCount = users.filter((user) => state.onlineUserIds.has(user.id)).length;
+      usersSummary.textContent = `${users.length} usuario(s) en la sala, ${onlineCount} online.`;
+
+      users.forEach((user) => {
+        const item = document.createElement('li');
+        const online = state.onlineUserIds.has(user.id);
+        item.className = 'user-card';
+        item.innerHTML = `
+          <div>
+            <strong>${escapeHtml(user.name || 'Usuario')}</strong>
+            <p class="muted">${escapeHtml(user.email || '')}</p>
+          </div>
+          <span class="online-badge ${online ? 'online' : ''}">${online ? 'Online' : 'Offline'}</span>
+        `;
+        usersList.appendChild(item);
+      });
+    }
+
+    function updateComposer() {
+      const enabled = Boolean(state.activeRoom && state.socket?.connected);
+      messageInput.disabled = !enabled;
+      sendMessageButton.disabled = !enabled;
+    }
+
+    function updateHeader() {
+      if (!state.activeRoom) {
+        chatTitle.textContent = 'Selecciona una sala';
+        chatSubtitle.textContent = 'Necesitas unirte a una sala para empezar a chatear.';
+        return;
+      }
+
+      chatTitle.textContent = state.activeRoom.name;
+      chatSubtitle.textContent = state.activeRoom.description || 'Sala lista para conversar en tiempo real.';
+    }
+
+    function setConnectionStatus(connected) {
+      connectionStatus.textContent = connected ? 'Conectado' : 'Desconectado';
+      connectionStatus.className = `status ${connected ? 'connected' : 'disconnected'}`;
+      updateComposer();
+    }
+
+    async function loadProfile() {
+      const data = await requestJson('/api/auth/me');
+      state.session.user = data.user;
+      writeSession(state.session);
+      currentUserName.textContent = data.user.name;
+      currentUserEmail.textContent = data.user.email;
+      state.onlineUserIds.add(data.user.id);
+    }
+
+    async function loadRooms() {
+      const data = await requestJson('/api/rooms');
+      state.rooms = data.rooms;
+
+      if (state.activeRoom && !state.rooms.some((room) => room.id === state.activeRoom.id)) {
+        state.activeRoom = null;
+        state.messages = [];
+        state.roomUsers = new Map();
+        clearActiveRoomId();
+      }
+
+      renderRooms();
+    }
+
+    function emitWithAck(eventName, payload) {
+      return new Promise((resolve, reject) => {
+        if (!state.socket) {
+          reject(new Error('Socket no disponible'));
+          return;
+        }
+
+        state.socket.emit(eventName, payload, (response) => {
+          if (!response?.ok) {
+            reject(new Error(response?.message || 'Operacion rechazada'));
+            return;
+          }
+
+          resolve(response);
+        });
+      });
+    }
+
+    async function openRoom(roomId) {
+      try {
+        setMessage(chatMessage, '', 'muted');
+
+        if (state.activeRoom?.id && state.activeRoom.id !== roomId && state.socket?.connected) {
+          await emitWithAck('room:leave', { roomId: state.activeRoom.id }).catch(() => {});
+        }
+
+        const joinData = await emitWithAck('room:join', { roomId });
+        const historyData = await requestJson(`/api/rooms/${roomId}/messages`);
+
+        state.activeRoom = historyData.room || joinData.room;
+        state.messages = historyData.messages || [];
+        state.roomUsers = new Map((joinData.users || []).map((user) => [user.id, user]));
+        state.roomUsers.set(state.session.user.id, state.session.user);
+        Array.from(state.roomUsers.keys()).forEach((userId) => state.onlineUserIds.add(userId));
+        writeActiveRoomId(state.activeRoom.id);
+
+        updateHeader();
+        renderRooms();
+        renderMessages();
+        renderRoomUsers();
+        updateComposer();
+        addActivity(`Te uniste a la sala ${state.activeRoom.name}.`);
+      } catch (error) {
+        setMessage(chatMessage, error.message, 'error');
+      }
+    }
+
+    function connectSocket() {
+      state.socket = io('/', {
+        auth: {
+          token: state.session.token
+        },
+        transports: ['websocket']
+      });
+
+      state.socket.on('connect', async () => {
+        setConnectionStatus(true);
+        addActivity('Socket conectado.');
+
+        const activeRoomId = state.activeRoom?.id || readActiveRoomId();
+
+        if (activeRoomId) {
+          await openRoom(activeRoomId);
+        }
+      });
+
+      state.socket.on('disconnect', () => {
+        setConnectionStatus(false);
+        addActivity('Socket desconectado.');
+      });
+
+      state.socket.on('connect_error', (error) => {
+        setConnectionStatus(false);
+        setMessage(chatMessage, error.message || 'No fue posible conectar el socket.', 'error');
+
+        if ((error.message || '').toLowerCase().includes('token')) {
+          clearSession();
+          redirectToLogin();
+        }
+      });
+
+      state.socket.on('user:online', (payload) => {
+        if (!payload?.userId) {
+          return;
+        }
+
+        state.onlineUserIds.add(payload.userId);
+        renderRoomUsers();
+
+        if (payload.userId !== state.session.user.id) {
+          const user = state.roomUsers.get(payload.userId);
+          addActivity(user ? `${user.name} esta online.` : `Usuario ${payload.userId} esta online.`);
+        }
+      });
+
+      state.socket.on('user:offline', (payload) => {
+        if (!payload?.userId) {
+          return;
+        }
+
+        state.onlineUserIds.delete(payload.userId);
+        renderRoomUsers();
+
+        if (payload.userId !== state.session.user.id) {
+          const user = state.roomUsers.get(payload.userId);
+          addActivity(user ? `${user.name} se desconecto.` : `Usuario ${payload.userId} se desconecto.`);
+        }
+      });
+
+      state.socket.on('room:user-joined', (payload) => {
+        if (!payload?.user || !state.activeRoom) {
+          return;
+        }
+
+        state.roomUsers.set(payload.user.id, payload.user);
+        state.onlineUserIds.add(payload.user.id);
+        renderRoomUsers();
+        addActivity(`${payload.user.name} entro a la sala.`);
+      });
+
+      state.socket.on('room:user-left', (payload) => {
+        if (!payload?.user || !state.activeRoom) {
+          return;
+        }
+
+        state.roomUsers.delete(payload.user.id);
+        renderRoomUsers();
+        addActivity(`${payload.user.name} salio de la sala.`);
+      });
+
+      state.socket.on('chat:typing', (payload) => {
+        if (!state.activeRoom || payload?.roomId !== state.activeRoom.id || payload?.user?.id === state.session.user.id) {
+          return;
+        }
+
+        typingIndicator.textContent = `${payload.user.name} esta escribiendo...`;
+        clearTimeout(state.typingTimerId);
+        state.typingTimerId = setTimeout(() => {
+          typingIndicator.textContent = '';
+        }, 1500);
+      });
+
+      state.socket.on('chat:message', (payload) => {
+        if (!state.activeRoom || payload?.roomId !== state.activeRoom.id) {
+          return;
+        }
+
+        state.messages.push(payload);
+        renderMessages();
+        typingIndicator.textContent = '';
+      });
+    }
+
+    roomsList.addEventListener('click', async (event) => {
+      const button = event.target.closest('button[data-room-id]');
+
+      if (!button) {
+        return;
+      }
+
+      await openRoom(button.dataset.roomId);
+    });
+
+    createRoomForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setMessage(roomsMessage, '', 'muted');
+      setBusy(createRoomForm, true);
+
+      try {
+        const data = await requestJson('/api/rooms', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: roomNameInput.value,
+            description: roomDescriptionInput.value
+          })
+        });
+
+        roomNameInput.value = '';
+        roomDescriptionInput.value = '';
+        setMessage(roomsMessage, 'Sala creada correctamente.', 'success');
+        addActivity(`Se creo la sala ${data.room.name}.`);
+        await loadRooms();
+        await openRoom(data.room.id);
+      } catch (error) {
+        setMessage(roomsMessage, error.message, 'error');
+      } finally {
+        setBusy(createRoomForm, false);
+      }
+    });
+
+    refreshRoomsButton.addEventListener('click', async () => {
+      try {
+        await loadRooms();
+        setMessage(roomsMessage, 'Lista de salas actualizada.', 'success');
+      } catch (error) {
+        setMessage(roomsMessage, error.message, 'error');
+      }
+    });
+
+    messageForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!state.activeRoom) {
+        setMessage(chatMessage, 'Primero debes seleccionar una sala.', 'error');
+        return;
+      }
+
+      try {
+        await emitWithAck('chat:message', {
+          roomId: state.activeRoom.id,
+          content: messageInput.value
+        });
+
+        messageInput.value = '';
+        messageInput.focus();
+        setMessage(chatMessage, '', 'muted');
+      } catch (error) {
+        setMessage(chatMessage, error.message, 'error');
+      }
+    });
+
+    messageInput.addEventListener('input', () => {
+      if (!state.activeRoom || !state.socket?.connected) {
+        return;
+      }
+
+      const now = Date.now();
+
+      if (now - state.lastTypingSentAt < 800) {
+        return;
+      }
+
+      state.lastTypingSentAt = now;
+      state.socket.emit('chat:typing', {
+        roomId: state.activeRoom.id
+      });
+    });
+
+    logoutButton.addEventListener('click', () => {
+      clearSession();
+      clearActiveRoomId();
+
+      if (state.socket) {
+        state.socket.disconnect();
+      }
+
+      redirectToLogin();
+    });
+
+    backButton.addEventListener('click', () => {
+      window.location.href = '/';
+    });
+
+    async function bootstrap() {
+      state.session = readSession();
+
+      if (!state.session?.token) {
+        redirectToLogin();
+        return;
+      }
+
+      try {
+        await loadProfile();
+        await loadRooms();
+        const savedRoomId = readActiveRoomId();
+
+        if (savedRoomId && state.rooms.some((room) => room.id === savedRoomId)) {
+          state.activeRoom = state.rooms.find((room) => room.id === savedRoomId);
+        } else if (savedRoomId) {
+          clearActiveRoomId();
+        }
+
+        updateHeader();
+        renderMessages();
+        renderRoomUsers();
+        connectSocket();
+      } catch (error) {
+        clearSession();
+        redirectToLogin();
+      }
+    }
+
+    bootstrap();
+  </script>
 </body>
 </html>
