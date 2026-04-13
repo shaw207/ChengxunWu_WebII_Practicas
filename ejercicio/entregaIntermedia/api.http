@@ -1,0 +1,152 @@
+@baseUrl = http://localhost:3000
+@accessToken = REPLACE_ACCESS_TOKEN
+@refreshToken = REPLACE_REFRESH_TOKEN
+@validationCode = 123456
+@logoPath = ./logo.png
+
+GET {{baseUrl}}/health
+
+###
+
+POST {{baseUrl}}/api/user/register
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "Password123"
+}
+
+###
+
+PUT {{baseUrl}}/api/user/validation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "code": "{{validationCode}}"
+}
+
+###
+
+POST {{baseUrl}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "Password123"
+}
+
+###
+
+PUT {{baseUrl}}/api/user/register
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Ana",
+  "lastName": "Lopez",
+  "nif": "12345678Z",
+  "address": {
+    "street": "Calle Mayor",
+    "number": "10",
+    "postal": "08001",
+    "city": "Barcelona",
+    "province": "Barcelona"
+  }
+}
+
+###
+
+PATCH {{baseUrl}}/api/user/company
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "isFreelance": false,
+  "name": "Bildy Construcciones",
+  "cif": "B12345678",
+  "address": {
+    "street": "Avenida Diagonal",
+    "number": "200",
+    "postal": "08018",
+    "city": "Barcelona",
+    "province": "Barcelona"
+  }
+}
+
+###
+
+PATCH {{baseUrl}}/api/user/company
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "isFreelance": true
+}
+
+###
+
+PATCH {{baseUrl}}/api/user/logo
+Authorization: Bearer {{accessToken}}
+Content-Type: multipart/form-data; boundary=BildyBoundary
+
+--BildyBoundary
+Content-Disposition: form-data; name="logo"; filename="logo.png"
+Content-Type: image/png
+
+< {{logoPath}}
+--BildyBoundary--
+
+###
+
+GET {{baseUrl}}/api/user
+Authorization: Bearer {{accessToken}}
+
+###
+
+POST {{baseUrl}}/api/user/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+POST {{baseUrl}}/api/user/logout
+Authorization: Bearer {{accessToken}}
+
+###
+
+PUT {{baseUrl}}/api/user/password
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Password123",
+  "newPassword": "Password456"
+}
+
+###
+
+POST {{baseUrl}}/api/user/invite
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "email": "invitado@example.com",
+  "password": "Password123",
+  "name": "Invitado",
+  "lastName": "Lopez",
+  "nif": "87654321X"
+}
+
+###
+
+DELETE {{baseUrl}}/api/user?soft=true
+Authorization: Bearer {{accessToken}}
+
+###
+
+DELETE {{baseUrl}}/api/user
+Authorization: Bearer {{accessToken}}
