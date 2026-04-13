@@ -74,6 +74,14 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
+  if (err.name === 'MulterError') {
+    return res.status(400).json({
+      error: true,
+      code: err.code,
+      message: err.code === 'LIMIT_FILE_SIZE' ? 'El archivo supera el tamano maximo' : err.message
+    });
+  }
+
   return res.status(500).json({
     error: true,
     code: 'INTERNAL_ERROR',

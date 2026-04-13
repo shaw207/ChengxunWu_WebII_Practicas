@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto';
+import Company from '../models/Company.js';
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { comparePassword, hashPassword } from '../utils/password.js';
@@ -15,6 +16,16 @@ const userAuthData = (user) => ({
   status: user.status,
   role: user.role
 });
+
+const plainAddress = (address = {}) => ({
+  street: address.street || null,
+  number: address.number || null,
+  postal: address.postal || null,
+  city: address.city || null,
+  province: address.province || null
+});
+
+const fullName = (user) => [user.name, user.lastName].filter(Boolean).join(' ');
 
 const saveTokens = async (user) => {
   const tokens = generateTokenPair(user);
@@ -146,6 +157,116 @@ export const loginUser = async (req, res, next) => {
     res.json({
       user: userAuthData(user),
       ...tokens
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePersonalData = async (req, res, next) => {
+  try {
+    const { name, lastName, nif, address } = req.body;
+
+    req.user.name = name;
+    req.user.lastName = lastName;
+    req.user.nif = nif;
+
+    if (address) {
+      req.user.address = {
+        ...plainAddress(req.user.address),
+        ...address
+      };
+    }
+
+    await req.user.save();
+
+    res.json({
+      user: req.user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCompany = async (req, res, next) => {
+  try {
+    const user = req.user;
+    const data = req.body;
+    let company;
+
+    if (data.isFreelance) {
+      if (!user.nif || !user.name || !user.lastName) {
+        throw AppError.badRequest('Completa los datos personales antes de crear una compania de autonomo', 'PERSONAL_DATA_REQUIRED');
+      }
+
+      const freelanceData = {
+        owner: user._id,
+        name: fullName(user),
+        cif: user.nif,
+        address: plainAddress(user.address),
+        isFreelance: true
+      };
+
+      company = await Company.findOne({ cif: freelanceData.cif });
+
+      if (!company) {
+        company = await Company.create(freelanceData);
+        user.role = 'admin';
+      } else {
+        user.role = company.owner.toString() === user._id.toString() ? 'admin' : 'guest';
+      }
+    } else {
+      company = await Company.findOne({ cif: data.cif });
+
+      if (!company) {
+        company = await Company.create({
+          owner: user._id,
+          name: data.name,
+          cif: data.cif,
+          address: data.address,
+          isFreelance: false
+        });
+        user.role = 'admin';
+      } else {
+        user.role = company.owner.toString() === user._id.toString() ? 'admin' : 'guest';
+      }
+    }
+
+    user.company = company._id;
+    await user.save();
+
+    res.json({
+      user: userAuthData(user),
+      company
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadCompanyLogo = async (req, res, next) => {
+  try {
+    if (!req.user.company) {
+      throw AppError.badRequest('El usuario no tiene compania asociada', 'COMPANY_REQUIRED');
+    }
+
+    if (!req.file) {
+      throw AppError.badRequest('El logo es obligatorio', 'LOGO_REQUIRED');
+    }
+
+    const company = await Company.findById(req.user.company);
+
+    if (!company) {
+      throw AppError.notFound('Compania', 'COMPANY_NOT_FOUND');
+    }
+
+    company.logo = `/uploads/${req.file.filename}`;
+    await company.save();
+
+    res.json({
+      ack: true,
+      logo: company.logo,
+      company
     });
   } catch (error) {
     next(error);
