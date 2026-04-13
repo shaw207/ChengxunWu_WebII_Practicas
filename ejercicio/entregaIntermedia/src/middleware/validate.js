@@ -11,7 +11,11 @@ export const validate = (schema) => async (req, res, next) => {
     }
 
     if (data.query) {
-      req.query = data.query;
+      Object.defineProperty(req, 'query', {
+        value: data.query,
+        configurable: true,
+        writable: true
+      });
     }
 
     if (data.params) {
