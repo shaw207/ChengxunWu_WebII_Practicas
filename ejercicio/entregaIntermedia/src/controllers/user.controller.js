@@ -3,7 +3,7 @@ import Company from '../models/Company.js';
 import User from '../models/User.js';
 import { AppError } from '../utils/AppError.js';
 import { comparePassword, hashPassword } from '../utils/password.js';
-import { generateTokenPair } from '../utils/token.js';
+import { generateAccessToken, generateTokenPair, verifyRefreshToken } from '../utils/token.js';
 import { emitUserEvent } from '../services/notification.service.js';
 
 const generateVerificationCode = () => {
@@ -267,6 +267,162 @@ export const uploadCompanyLogo = async (req, res, next) => {
       ack: true,
       logo: company.logo,
       company
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate('company');
+
+    if (!user) {
+      throw AppError.notFound('Usuario', 'USER_NOT_FOUND');
+    }
+
+    res.json({
+      user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshSession = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    const payload = verifyRefreshToken(refreshToken);
+    const user = await User.findById(payload.userId).select('+refreshToken +refreshTokenExpiresAt');
+
+    if (!user || user.refreshToken !== refreshToken) {
+      throw AppError.unauthorized('Refresh token invalido', 'INVALID_REFRESH_TOKEN');
+    }
+
+    if (!user.refreshTokenExpiresAt || user.refreshTokenExpiresAt < new Date()) {
+      user.refreshToken = null;
+      user.refreshTokenExpiresAt = null;
+      await user.save();
+      throw AppError.unauthorized('Refresh token expirado', 'REFRESH_TOKEN_EXPIRED');
+    }
+
+    const accessToken = generateAccessToken(user);
+
+    res.json({
+      accessToken
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logoutUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select('+refreshToken +refreshTokenExpiresAt');
+
+    if (!user) {
+      throw AppError.notFound('Usuario', 'USER_NOT_FOUND');
+    }
+
+    user.refreshToken = null;
+    user.refreshTokenExpiresAt = null;
+    await user.save();
+
+    res.json({
+      ack: true,
+      message: 'Sesion cerrada'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const email = req.user.email;
+
+    if (req.query.soft) {
+      await req.user.softDelete();
+    } else {
+      await User.findByIdAndDelete(req.user._id).setOptions({ withDeleted: true });
+    }
+
+    emitUserEvent('user:deleted', {
+      userId: req.user._id.toString(),
+      email
+    });
+
+    res.json({
+      ack: true,
+      deleted: true,
+      soft: Boolean(req.query.soft)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+      throw AppError.notFound('Usuario', 'USER_NOT_FOUND');
+    }
+
+    const isPasswordValid = await comparePassword(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw AppError.unauthorized('La contrasena actual no es correcta', 'INVALID_CURRENT_PASSWORD');
+    }
+
+    user.password = await hashPassword(newPassword);
+    await user.save();
+
+    res.json({
+      ack: true,
+      message: 'Contrasena actualizada'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const inviteUser = async (req, res, next) => {
+  try {
+    if (!req.user.company) {
+      throw AppError.badRequest('El usuario no tiene compania asociada', 'COMPANY_REQUIRED');
+    }
+
+    const { email, password, name, lastName, nif } = req.body;
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      throw AppError.conflict('El email ya esta registrado', 'EMAIL_ALREADY_EXISTS');
+    }
+
+    const user = await User.create({
+      email,
+      password: await hashPassword(password),
+      name,
+      lastName,
+      nif,
+      role: 'guest',
+      status: 'pending',
+      verificationCode: generateVerificationCode(),
+      verificationAttempts: 3,
+      company: req.user.company
+    });
+
+    emitUserEvent('user:invited', {
+      userId: user._id.toString(),
+      email: user.email,
+      company: req.user.company.toString()
+    });
+
+    res.status(201).json({
+      user: userAuthData(user)
     });
   } catch (error) {
     next(error);
