@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  LIBRARIAN
+  ADMIN
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  password String
+  role     Role     @default(USER)
+  loans    Loan[]
+  reviews  Review[]
+
+  @@map("users")
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  isbn          String   @unique
+  title         String
+  author        String
+  genre         String
+  description   String?  @db.Text
+  publishedYear Int
+  copies        Int
+  available     Int
+  loans         Loan[]
+  reviews       Review[]
+
+  @@index([author])
+  @@index([genre])
+  @@index([available])
+  @@map("books")
+}
+
+model Loan {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  bookId     Int
+  loanDate   DateTime   @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     LoanStatus @default(ACTIVE)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book       Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([bookId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([userId, status])
+  @@index([userId, bookId, status])
+  @@map("loans")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  bookId    Int
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+  @@index([bookId])
+  @@index([rating])
+  @@map("reviews")
+}

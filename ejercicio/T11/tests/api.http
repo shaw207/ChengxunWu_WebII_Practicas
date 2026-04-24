@@ -1,0 +1,138 @@
+@baseUrl = http://localhost:3000
+@adminToken = REPLACE_ADMIN_TOKEN
+@librarianToken = REPLACE_LIBRARIAN_TOKEN
+@userToken = REPLACE_USER_TOKEN
+@bookId = 1
+@loanId = 1
+@reviewId = 1
+
+GET {{baseUrl}}/health
+
+###
+
+GET {{baseUrl}}/api-docs.json
+
+###
+
+GET {{baseUrl}}/api-docs
+
+###
+
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Ana Reader",
+  "email": "ana.reader@example.com",
+  "password": "Reader1234"
+}
+
+###
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "reader@library.test",
+  "password": "User12345"
+}
+
+###
+
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{userToken}}
+
+###
+
+GET {{baseUrl}}/api/books?page=1&limit=10
+
+###
+
+GET {{baseUrl}}/api/books?genre=Classic&available=true&page=1&limit=10
+
+###
+
+GET {{baseUrl}}/api/books/stats?limit=5
+Authorization: Bearer {{librarianToken}}
+
+###
+
+GET {{baseUrl}}/api/books/{{bookId}}
+
+###
+
+POST {{baseUrl}}/api/books
+Authorization: Bearer {{librarianToken}}
+Content-Type: application/json
+
+{
+  "isbn": "9788499890944",
+  "title": "Biblioteca Moderna",
+  "author": "Maria Perez",
+  "genre": "Education",
+  "description": "Libro de ejemplo para pruebas.",
+  "publishedYear": 2024,
+  "copies": 4,
+  "available": 4
+}
+
+###
+
+PUT {{baseUrl}}/api/books/{{bookId}}
+Authorization: Bearer {{librarianToken}}
+Content-Type: application/json
+
+{
+  "genre": "Updated Genre",
+  "copies": 6
+}
+
+###
+
+DELETE {{baseUrl}}/api/books/{{bookId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+GET {{baseUrl}}/api/loans
+Authorization: Bearer {{userToken}}
+
+###
+
+GET {{baseUrl}}/api/loans/all
+Authorization: Bearer {{librarianToken}}
+
+###
+
+POST {{baseUrl}}/api/loans
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "bookId": {{bookId}}
+}
+
+###
+
+PUT {{baseUrl}}/api/loans/{{loanId}}/return
+Authorization: Bearer {{userToken}}
+
+###
+
+GET {{baseUrl}}/api/books/{{bookId}}/reviews
+
+###
+
+POST {{baseUrl}}/api/books/{{bookId}}/reviews
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "Excelente lectura"
+}
+
+###
+
+DELETE {{baseUrl}}/api/reviews/{{reviewId}}
+Authorization: Bearer {{userToken}}
