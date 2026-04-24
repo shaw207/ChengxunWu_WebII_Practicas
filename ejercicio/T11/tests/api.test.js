@@ -83,6 +83,14 @@ describe('library api', () => {
     expect(response.body.openapi).toBe('3.0.3');
   });
 
+  test('reports api health with database status', async () => {
+    const response = await request(app).get('/api/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe('ok');
+    expect(response.body.database).toBe('connected');
+  });
+
   test('returns current user profile', async () => {
     const response = await request(app)
       .get('/api/auth/me')

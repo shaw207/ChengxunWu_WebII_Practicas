@@ -13,7 +13,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/health', async (req, res) => {
+const healthCheck = async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.json({
@@ -28,7 +28,10 @@ app.get('/health', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   }
-});
+};
+
+app.get('/health', healthCheck);
+app.get('/api/health', healthCheck);
 
 app.get('/api-docs.json', (req, res) => {
   res.json(swaggerDocument);
