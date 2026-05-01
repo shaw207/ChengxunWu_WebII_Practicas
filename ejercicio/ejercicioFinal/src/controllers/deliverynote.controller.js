@@ -1,7 +1,9 @@
 import Client from '../models/Client.js';
 import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
+import { optimizeSignatureImage } from '../services/image.service.js';
 import { generateDeliveryNotePdf } from '../services/pdf.service.js';
+import { uploadDeliveryNotePdf, uploadSignatureImage } from '../services/storage.service.js';
 import { AppError } from '../utils/AppError.js';
 import { buildPagination, buildSort, paginationMeta } from '../utils/query.js';
 
@@ -131,6 +133,51 @@ export const downloadDeliveryNotePdf = async (req, res, next) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=deliverynote-${deliveryNote._id}.pdf`);
     res.send(pdf);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signDeliveryNote = async (req, res, next) => {
+  try {
+    requireCompany(req.user);
+
+    if (!req.file) {
+      throw AppError.badRequest('La firma es obligatoria', 'SIGNATURE_REQUIRED');
+    }
+
+    const deliveryNote = await findDeliveryNoteForCompany(req, req.params.id);
+
+    if (deliveryNote.signed) {
+      throw AppError.badRequest('El albaran ya esta firmado', 'DELIVERY_NOTE_ALREADY_SIGNED');
+    }
+
+    const optimizedSignature = await optimizeSignatureImage(req.file.buffer);
+    const signature = await uploadSignatureImage({
+      buffer: optimizedSignature,
+      deliveryNoteId: deliveryNote._id.toString()
+    });
+
+    deliveryNote.signed = true;
+    deliveryNote.signedAt = new Date();
+    deliveryNote.signatureUrl = signature.url;
+    await deliveryNote.save();
+
+    const populatedDeliveryNote = await findDeliveryNoteForCompany(req, deliveryNote._id);
+    const pdfBuffer = await generateDeliveryNotePdf(populatedDeliveryNote);
+    const pdf = await uploadDeliveryNotePdf({
+      buffer: pdfBuffer,
+      deliveryNoteId: deliveryNote._id.toString()
+    });
+
+    populatedDeliveryNote.pdfUrl = pdf.url;
+    await populatedDeliveryNote.save();
+
+    res.json({
+      deliveryNote: populatedDeliveryNote,
+      signatureUrl: signature.url,
+      pdfUrl: pdf.url
+    });
   } catch (error) {
     next(error);
   }
