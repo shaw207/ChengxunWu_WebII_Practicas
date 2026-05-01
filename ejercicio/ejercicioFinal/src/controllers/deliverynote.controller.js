@@ -3,6 +3,7 @@ import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
 import { optimizeSignatureImage } from '../services/image.service.js';
 import { generateDeliveryNotePdf } from '../services/pdf.service.js';
+import { emitToCompany, REALTIME_EVENTS } from '../services/realtime.service.js';
 import { uploadDeliveryNotePdf, uploadSignatureImage } from '../services/storage.service.js';
 import { AppError } from '../utils/AppError.js';
 import { buildPagination, buildSort, paginationMeta } from '../utils/query.js';
@@ -62,6 +63,12 @@ export const createDeliveryNote = async (req, res, next) => {
       company: req.user.company,
       client: project.client,
       project: project._id
+    });
+
+    emitToCompany(req.user.company, REALTIME_EVENTS.DELIVERY_NOTE_NEW, {
+      deliveryNoteId: deliveryNote._id.toString(),
+      project: deliveryNote.project.toString(),
+      client: deliveryNote.client.toString()
     });
 
     res.status(201).json({ deliveryNote });
@@ -172,6 +179,12 @@ export const signDeliveryNote = async (req, res, next) => {
 
     populatedDeliveryNote.pdfUrl = pdf.url;
     await populatedDeliveryNote.save();
+
+    emitToCompany(req.user.company, REALTIME_EVENTS.DELIVERY_NOTE_SIGNED, {
+      deliveryNoteId: populatedDeliveryNote._id.toString(),
+      pdfUrl: populatedDeliveryNote.pdfUrl,
+      signatureUrl: populatedDeliveryNote.signatureUrl
+    });
 
     res.json({
       deliveryNote: populatedDeliveryNote,

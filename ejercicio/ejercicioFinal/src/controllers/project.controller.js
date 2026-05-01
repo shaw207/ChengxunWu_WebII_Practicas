@@ -1,5 +1,6 @@
 import Client from '../models/Client.js';
 import Project from '../models/Project.js';
+import { emitToCompany, REALTIME_EVENTS } from '../services/realtime.service.js';
 import { AppError } from '../utils/AppError.js';
 import { buildPagination, buildSort, paginationMeta } from '../utils/query.js';
 
@@ -50,6 +51,12 @@ export const createProject = async (req, res, next) => {
       ...req.body,
       user: req.user._id,
       company: req.user.company
+    });
+
+    emitToCompany(req.user.company, REALTIME_EVENTS.PROJECT_NEW, {
+      projectId: project._id.toString(),
+      name: project.name,
+      client: project.client.toString()
     });
 
     res.status(201).json({ project });
