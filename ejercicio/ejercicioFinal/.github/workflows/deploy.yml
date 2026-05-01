@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy after CI
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ejercicioFinal
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ejercicioFinal/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests before deploy
+        run: npm test
+
+      - name: Deploy placeholder
+        run: |
+          echo "Configure deployment with provider secrets."
+          echo "Expected secrets: DEPLOY_WEBHOOK_URL or provider-specific token."
