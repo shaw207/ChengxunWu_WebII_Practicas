@@ -3,6 +3,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import routes from './routes/index.js';
 import { env, getDatabaseStatus } from './config/index.js';
+import { errorHandler, notFound } from './middleware/error-handler.js';
+import { apiRateLimit } from './middleware/rate-limit.js';
+import { requestLogger } from './middleware/request-logger.js';
+import { sanitizeInput } from './middleware/sanitize.js';
 
 const app = express();
 
@@ -10,6 +14,9 @@ app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
+app.use(sanitizeInput);
+app.use(apiRateLimit);
 
 app.get('/health', (req, res) => {
   res.json({
@@ -21,5 +28,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api', routes);
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;
