@@ -1,0 +1,203 @@
+@baseUrl = http://localhost:3000
+@token = replace_with_access_token
+@refreshToken = replace_with_refresh_token
+@clientId = replace_with_client_id
+@projectId = replace_with_project_id
+@deliveryNoteId = replace_with_deliverynote_id
+
+### Health
+GET {{baseUrl}}/health
+
+### Swagger
+GET {{baseUrl}}/api-docs/
+
+### Register
+POST {{baseUrl}}/api/user/register
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "password123"
+}
+
+### Login
+POST {{baseUrl}}/api/user/login
+Content-Type: application/json
+
+{
+  "email": "ana@example.com",
+  "password": "password123"
+}
+
+### Validate email
+PUT {{baseUrl}}/api/user/validation
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+
+### Update personal data
+PUT {{baseUrl}}/api/user/register
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Ana",
+  "lastName": "Garcia",
+  "nif": "12345678Z",
+  "address": {
+    "street": "Mayor",
+    "number": "1",
+    "postal": "28001",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### Create company
+PATCH {{baseUrl}}/api/user/company
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isFreelance": false,
+  "name": "Bildy Construcciones",
+  "cif": "B12345678",
+  "address": {
+    "street": "Empresa",
+    "number": "2",
+    "postal": "28002",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### Get authenticated user
+GET {{baseUrl}}/api/user
+Authorization: Bearer {{token}}
+
+### Create client
+POST {{baseUrl}}/api/client
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Cliente Norte",
+  "cif": "B87654321",
+  "email": "cliente@example.com",
+  "phone": "+34910000000",
+  "address": {
+    "street": "Cliente",
+    "number": "3",
+    "postal": "28003",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### List clients
+GET {{baseUrl}}/api/client?page=1&limit=10&name=Cliente&sortBy=name&order=asc
+Authorization: Bearer {{token}}
+
+### Get client
+GET {{baseUrl}}/api/client/{{clientId}}
+Authorization: Bearer {{token}}
+
+### Update client
+PUT {{baseUrl}}/api/client/{{clientId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "+34911111111"
+}
+
+### Archive client
+DELETE {{baseUrl}}/api/client/{{clientId}}?soft=true
+Authorization: Bearer {{token}}
+
+### List archived clients
+GET {{baseUrl}}/api/client/archived
+Authorization: Bearer {{token}}
+
+### Restore client
+PATCH {{baseUrl}}/api/client/{{clientId}}/restore
+Authorization: Bearer {{token}}
+
+### Create project
+POST {{baseUrl}}/api/project
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "client": "{{clientId}}",
+  "name": "Reforma local centro",
+  "projectCode": "PR-001",
+  "address": {
+    "street": "Obra",
+    "number": "4",
+    "postal": "28004",
+    "city": "Madrid",
+    "province": "Madrid"
+  },
+  "email": "obra@example.com",
+  "notes": "Acceso por puerta lateral",
+  "active": true
+}
+
+### List projects
+GET {{baseUrl}}/api/project?page=1&limit=10&client={{clientId}}&active=true&sort=-createdAt
+Authorization: Bearer {{token}}
+
+### Create delivery note hours
+POST {{baseUrl}}/api/deliverynote
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "project": "{{projectId}}",
+  "format": "hours",
+  "description": "Trabajos de instalacion",
+  "workDate": "2026-05-01",
+  "workers": [
+    { "name": "Operario 1", "hours": 4 },
+    { "name": "Operario 2", "hours": 3 }
+  ]
+}
+
+### Create delivery note material
+POST {{baseUrl}}/api/deliverynote
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "project": "{{projectId}}",
+  "format": "material",
+  "description": "Entrega de material",
+  "workDate": "2026-05-01",
+  "material": "Cable",
+  "quantity": 10,
+  "unit": "m"
+}
+
+### List delivery notes
+GET {{baseUrl}}/api/deliverynote?page=1&limit=10&project={{projectId}}&format=hours&signed=false&sort=-workDate
+Authorization: Bearer {{token}}
+
+### Download delivery note PDF
+GET {{baseUrl}}/api/deliverynote/pdf/{{deliveryNoteId}}
+Authorization: Bearer {{token}}
+
+### Sign delivery note
+PATCH {{baseUrl}}/api/deliverynote/{{deliveryNoteId}}/sign
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="signature"; filename="signature.png"
+Content-Type: image/png
+
+< ./signature.png
+------WebKitFormBoundary--
