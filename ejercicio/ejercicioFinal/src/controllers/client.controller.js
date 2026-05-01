@@ -121,7 +121,7 @@ export const updateClient = async (req, res, next) => {
     }
 
     const client = await Client.findOneAndUpdate(companyFilter(req, { _id: req.params.id }), req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
 

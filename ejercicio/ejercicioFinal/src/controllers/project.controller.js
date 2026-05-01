@@ -146,7 +146,7 @@ export const updateProject = async (req, res, next) => {
     }
 
     const project = await Project.findOneAndUpdate(companyFilter(req, { _id: req.params.id }), req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     }).populate('client');
 
