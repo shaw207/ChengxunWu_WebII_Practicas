@@ -202,7 +202,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
     const deliveryNote = await findDeliveryNoteForCompany(req, req.params.id, { withDeleted: true });
 
     if (deliveryNote.signed) {
-      throw AppError.badRequest('No se puede borrar un albaran firmado', 'SIGNED_DELIVERY_NOTE_LOCKED');
+      throw AppError.conflict('No se puede borrar un albaran firmado', 'SIGNED_DELIVERY_NOTE_LOCKED');
     }
 
     await DeliveryNote.deleteOne({ _id: deliveryNote._id }).setOptions({ withDeleted: true });
